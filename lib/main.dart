@@ -57,7 +57,7 @@ class _LoginPageState extends State<LoginPage> {
       ));
     } else {
       // Handle login error
-      print('Login error is: ${response.error!.message}');
+      print('Login error: ${response.error!.message}');
       // Display an error message to the user if needed
     }
   }
