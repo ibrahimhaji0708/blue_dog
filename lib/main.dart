@@ -118,14 +118,12 @@ class _LoginPageState extends State<LoginPage> {
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: const Text('Logged Out'),
+                          title: const Text('Logged In'),
                           content: const Text('You have been logged in.'),
                           actions: <Widget>[
                             TextButton(
                               child: const Text('OK'),
                               onPressed: () {
-                                Navigator.of(context).pop();
-                                Navigator.of(context).pop();
                                 Navigator.of(context).pop();
                               },
                             ),
