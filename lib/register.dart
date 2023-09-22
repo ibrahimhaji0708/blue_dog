@@ -1,9 +1,12 @@
 //import 'package:blue_dog/main.dart';
+import 'package:blue_dog/check_email.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  const RegisterScreen({
+    super.key,
+  });
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -12,6 +15,7 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
   Future<void> createUser() async {
     final supabase = SupabaseClient(
       'https://ydvzfbbrjpyccxoabdxz.supabase.co',
@@ -30,6 +34,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (response != null && response.error != null) {
       print('Error: ${response.error!.message}');
+    }
+
+    if (response != null && response.error == null) {
+      // Navigate to CheckEmailScreen and pass the registered email
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => CheckEmailScreen(email: email),
+        ),
+      );
     }
   }
 

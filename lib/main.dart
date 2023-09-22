@@ -46,6 +46,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   Future<void> _login() async {
+    var supabaseClient;
     final response = await supabaseClient.auth.signIn(
       email: _emailController.text,
       password: _passwordController.text,

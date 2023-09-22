@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase/supabase.dart';
 
 class CheckEmailScreen extends StatelessWidget {
-  CheckEmailScreen({super.key});
-
+  CheckEmailScreen({super.key, this.email});
+  final String? email;
   final supabase = SupabaseClient(
   'https://ydvzfbbrjpyccxoabdxz.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkdnpmYmJyanB5Y2N4b2FiZHh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTQ3ODAwMDQsImV4cCI6MjAxMDM1NjAwNH0.wkQE09ZoNK5PQBa89Pp17CYitzf6h_kp6O1fPFfCwO4',
@@ -24,8 +24,8 @@ class CheckEmailScreen extends StatelessWidget {
               child: Text('A Verification link has been sent to:'),
             ),
             const SizedBox(height: 6),
-            const Center(
-              child: Text('\$email'),
+            Center(
+              child: Text(email!),
             ),
             const SizedBox(height: 50),
             Image.asset(
@@ -37,9 +37,10 @@ class CheckEmailScreen extends StatelessWidget {
               icon:
                   const Icon(Icons.logout), // You can use any icon you prefer.
               onPressed: () async {
+                var supabaseClient;
                 final response = await supabaseClient.auth.signOut();
                 if (response.error == null) {
-                  Navigator.of(context).pop(); // Return to the login screen
+                  Navigator.of(context).pop(); 
                 } else {
                   // Handle logout error
                   print('Logout error: ${response.error!.message}');
