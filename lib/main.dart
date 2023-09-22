@@ -14,7 +14,6 @@ final supabase = SupabaseClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkdnpmYmJyanB5Y2N4b2FiZHh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTQ3ODAwMDQsImV4cCI6MjAxMDM1NjAwNH0.wkQE09ZoNK5PQBa89Pp17CYitzf6h_kp6O1fPFfCwO4',
 );
 
-
 class BlueDog extends StatelessWidget {
   const BlueDog({super.key});
 
@@ -113,7 +112,28 @@ class _LoginPageState extends State<LoginPage> {
                 width: 350,
                 height: 50,
                 child: OutlinedButton(
-                  onPressed: _login,
+                  //onPressed: _login,
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Logged Out'),
+                          content: const Text('You have been logged in.'),
+                          actions: <Widget>[
+                            TextButton(
+                              child: const Text('OK'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                Navigator.of(context).pop();
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(Colors.blue),
                     textStyle: MaterialStateTextStyle.resolveWith(
@@ -131,7 +151,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: OutlinedButton(
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const RegisterScreen()));
+                        builder: (context) => const RegisterScreen()));
                   },
                   child: const Text('Register'),
                 ),
