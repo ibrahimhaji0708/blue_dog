@@ -3,6 +3,7 @@ import 'package:supabase/supabase.dart';
 
 class CheckEmailScreen extends StatelessWidget {
   CheckEmailScreen({super.key, this.email});
+  
   final String? email;
   final supabase = SupabaseClient(
   'https://ydvzfbbrjpyccxoabdxz.supabase.co',

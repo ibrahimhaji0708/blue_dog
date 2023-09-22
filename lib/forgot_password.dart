@@ -1,4 +1,5 @@
 //import 'package:blue_dog/check_email.dart';
+import 'package:blue_dog/check_email.dart';
 import 'package:blue_dog/main.dart';
 import 'package:flutter/material.dart';
 //import 'package:supabase_flutter/supabase_flutter.dart';
@@ -13,12 +14,26 @@ class ForgotPassScreen extends StatefulWidget {
 class _ForgotPassScreenState extends State<ForgotPassScreen> {
   final TextEditingController _emailController = TextEditingController();
 
-  void _sendPasswordResetEmail() async {
-    await supabase.auth.resetPasswordForEmail(
-        _emailController.text); //sendPasswordResetEmail(_emailController.text)
+  //void _sendPasswordResetEmail() async {
+  // await supabase.auth.resetPasswordForEmail(
+  //     _emailController.text); //sendPasswordResetEmail(_emailController.text)
 
-    // Show a success message to the user.
+  void _sendPasswordResetEmail() async {
+    final email = _emailController.text;
+    try {
+      await supabase.auth.resetPasswordForEmail(email);
+
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => CheckEmailScreen(email: email),
+        ),
+      );
+    } catch (e) {
+      print('Error sending password reset email: $e');
+    }
   }
+
+  //}
 
   @override
   Widget build(BuildContext context) {
