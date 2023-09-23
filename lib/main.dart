@@ -1,8 +1,11 @@
 import 'package:blue_dog/forgot_password.dart';
-import 'package:blue_dog/logic/email_password_input.dart';
+import 'package:blue_dog/email_password_input.dart';
 import 'package:blue_dog/register.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase/supabase.dart';
+
+import 'bloc/main_bloc.dart';
 
 void main() {
   runApp(const BlueDog());
@@ -10,7 +13,7 @@ void main() {
 
 final supabase = SupabaseClient(
   'https://ydvzfbbrjpyccxoabdxz.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkdnpmYmJyanB5Y2N4b2FiZHh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTQ3ODAwMDQsImV4cCI6MjAxMDM1NjAwNH0.wkQE09ZoNK5PQBa89Pp17CYitzf6h_kp6O1fPFfCwO4',
+  'YOUR_SUPABASE_API_KEY',
 );
 
 class BlueDog extends StatelessWidget {
@@ -27,96 +30,21 @@ class BlueDog extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const LoginPage(),
+      home: BlocProvider(
+        create: (_) => MainBloc(),
+        child: const LoginPage(),
+      ),
     );
   }
 }
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  bool _emailValid = false;
-  bool _passwordValid = false;
-
-  Future<void> _login() async {
-    if (_emailValid && _passwordValid) {
-      //var supabaseClient;
-      final email = _emailController.text;
-      final password = _passwordController.text;
-
-      await Future.delayed(const Duration(seconds: 60)); // Adjust the duration as needed
-
-      //BuildContext currentContext = context;
-
-      // Check if the user exists in Supabase
-      final userQuery =
-          await supabase.from('users').select().eq('email', email).execute();
-
-      if (userQuery.data == null || userQuery.data.isEmpty) {
-        // User doesn't exist, show a message to register
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Registration Required'),
-              content: const Text(
-                  'You haven\'t registered yet. Please register your details and try logging in again.'),
-              actions: <Widget>[
-                TextButton(
-                  child: const Text('OK'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      } else {
-        // User exists, perform login
-        final response = await supabase.auth.signUp(
-          email: email,
-          password: password,
-        );
-
-        if (response.user == null) {
-          // Successfully logged in
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: const Text('Logged In'),
-                content: const Text('You have been logged in.'),
-                actions: <Widget>[
-                  TextButton(
-                    child: const Text('OK'),
-                    onPressed: () {
-                      _login();
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              );
-            },
-          );
-        } else {
-          // Handle login error
-          print('Login error: ${response.user!.email}');
-          // Display an error message to the user if needed
-        }
-      }
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final mainBloc = BlocProvider.of<MainBloc>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('BLUE DOG'),
@@ -135,22 +63,18 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 70.0),
               EmailPasswordInput(
-                controller: _emailController,
+                controller: TextEditingController(text: mainBloc.state.email),
                 hintText: 'Email',
                 onValidationChanged: (isValid) {
-                  setState(() {
-                    _emailValid = isValid;
-                  });
+                  mainBloc.add(EmailChanged(mainBloc.state.email));
                 },
               ),
               EmailPasswordInput(
-                controller: _passwordController,
+                controller: TextEditingController(text: mainBloc.state.password),
                 hintText: 'Password',
                 isPassword: true,
                 onValidationChanged: (isValid) {
-                  setState(() {
-                    _passwordValid = isValid;
-                  });
+                  mainBloc.add(PasswordChanged(mainBloc.state.password));
                 },
               ),
               const SizedBox(height: 20),
@@ -172,7 +96,8 @@ class _LoginPageState extends State<LoginPage> {
                 height: 50,
                 child: OutlinedButton(
                   onPressed: () {
-                    _login();
+                    // Dispatch a login event to MainBloc
+                    mainBloc.add(const LoginPage() as MainEvent);
                   },
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(Colors.blue),
