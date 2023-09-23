@@ -21,18 +21,18 @@ class BlueDog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Blue Dog',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromARGB(255, 255, 255, 255),
+    return BlocProvider(
+      create: (_) => MainBloc(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Blue Dog',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color.fromARGB(255, 255, 255, 255),
+          ),
+          useMaterial3: true,
         ),
-        useMaterial3: true,
-      ),
-      home: BlocProvider(
-        create: (_) => MainBloc(),
-        child: const LoginPage(),
+        home: const LoginPage(),
       ),
     );
   }

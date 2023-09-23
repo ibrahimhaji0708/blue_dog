@@ -71,7 +71,7 @@ class RegisterScreen extends StatelessWidget {
                             (states) => const TextStyle(color: Colors.white)),
                       ),
                       child: state.isLoading
-                          ? CircularProgressIndicator() // Show loading indicator
+                          ? const CircularProgressIndicator() // Show loading indicator
                           : const Text('Register'),
                     ),
                   ),
