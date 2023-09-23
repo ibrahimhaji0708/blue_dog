@@ -1,5 +1,4 @@
-//import 'package:blue_dog/main.dart';
-import 'package:blue_dog/check_email.dart';
+import 'package:blue_dog/logic/email_password_input.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -16,7 +15,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  Future<void> createUser() async {
+  Future<void> createUser(BuildContext context) async {
     final supabase = SupabaseClient(
       'https://ydvzfbbrjpyccxoabdxz.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkdnpmYmJyanB5Y2N4b2FiZHh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTQ3ODAwMDQsImV4cCI6MjAxMDM1NjAwNH0.wkQE09ZoNK5PQBa89Pp17CYitzf6h_kp6O1fPFfCwO4',
@@ -34,15 +33,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (response != null && response.error != null) {
       print('Error: ${response.error!.message}');
-    }
-
-    if (response != null && response.error == null) {
-      // Navigate to CheckEmailScreen and pass the registered email
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => CheckEmailScreen(email: email),
-        ),
-      );
     }
   }
 
@@ -65,21 +55,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 width: 150.0,
               ),
               const SizedBox(height: 70.0),
-              TextField(
+              // In your Registration screen
+              EmailPasswordInput(
                 controller: _emailController,
-                decoration: const InputDecoration(
-                  hintText: 'Email',
-                  border: OutlineInputBorder(),
-                ),
+                hintText: 'Email',
               ),
-              const SizedBox(height: 10.0),
-              TextField(
+              EmailPasswordInput(
                 controller: _passwordController,
-                obscureText: true, // For password
-                decoration: const InputDecoration(
-                  hintText: 'Password',
-                  border: OutlineInputBorder(),
-                ),
+                hintText: 'Password',
+                isPassword: true,
               ),
               const SizedBox(height: 10.0),
               const TextField(
@@ -95,12 +79,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 width: 350,
                 height: 50,
                 child: OutlinedButton(
-                  onPressed: createUser,
+                  onPressed: () {
+                    createUser(context);
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Thank You for registering to our app!!'),
+                          content: const Text('You have been Registered Successfully.'),
+                          actions: <Widget>[
+                            TextButton(
+                              child: const Text('OK'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                Navigator.of(context).pop();
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) =>
+                                        const RegisterScreen()));
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(Colors.blue),
                     textStyle: MaterialStateTextStyle.resolveWith(
                         (states) => const TextStyle(color: Colors.white)),
-                    //side: MaterialStateProperty.all(const BorderSide(color: Colors.red)),
                   ),
                   child: const Text('Register'),
                 ),

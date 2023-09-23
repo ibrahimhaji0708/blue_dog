@@ -1,8 +1,7 @@
-//import 'package:blue_dog/check_email.dart';
 import 'package:blue_dog/check_email.dart';
-import 'package:blue_dog/main.dart';
+import 'package:blue_dog/logic/email_password_input.dart';
 import 'package:flutter/material.dart';
-//import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ForgotPassScreen extends StatefulWidget {
   const ForgotPassScreen({super.key});
@@ -11,14 +10,16 @@ class ForgotPassScreen extends StatefulWidget {
   State<ForgotPassScreen> createState() => _ForgotPassScreenState();
 }
 
+final supabase = SupabaseClient(
+  'https://ydvzfbbrjpyccxoabdxz.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkdnpmYmJyanB5Y2N4b2FiZHh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTQ3ODAwMDQsImV4cCI6MjAxMDM1NjAwNH0.wkQE09ZoNK5PQBa89Pp17CYitzf6h_kp6O1fPFfCwO4',
+);
+
 class _ForgotPassScreenState extends State<ForgotPassScreen> {
   final TextEditingController _emailController = TextEditingController();
 
-  //void _sendPasswordResetEmail() async {
-  // await supabase.auth.resetPasswordForEmail(
-  //     _emailController.text); //sendPasswordResetEmail(_emailController.text)
-
   void _sendPasswordResetEmail() async {
+    //var supabase;
     final email = _emailController.text;
     try {
       await supabase.auth.resetPasswordForEmail(email);
@@ -33,8 +34,6 @@ class _ForgotPassScreenState extends State<ForgotPassScreen> {
     }
   }
 
-  //}
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,7 +44,6 @@ class _ForgotPassScreenState extends State<ForgotPassScreen> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            //mainAxisAlignment: MainAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               const SizedBox(height: 65.0),
@@ -55,30 +53,22 @@ class _ForgotPassScreenState extends State<ForgotPassScreen> {
                 width: 150.0,
               ),
               const SizedBox(height: 110.0),
-              TextField(
+              // In your Forgot Password screen
+              EmailPasswordInput(
                 controller: _emailController,
-                decoration: const InputDecoration(
-                  hintText: 'Email',
-                  border: OutlineInputBorder(),
-                ),
+                hintText: 'Email',
               ),
-              const SizedBox(height: 30.0),
-
+              const SizedBox(height: 30),
               // ignore: sized_box_for_whitespace
               Container(
                 width: 350,
                 height: 50,
                 child: OutlinedButton(
                   onPressed: _sendPasswordResetEmail,
-                  // onPressed: () {
-                  //   Navigator.of(context).push(MaterialPageRoute(
-                  //       builder: () => const CheckEmailScreen()));
-                  // },
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(Colors.blue),
                     textStyle: MaterialStateTextStyle.resolveWith(
                         (states) => const TextStyle(color: Colors.white)),
-                    //side: MaterialStateProperty.all(const BorderSide(color: Colors.red)),
                   ),
                   child: const Text('Send Link'),
                 ),

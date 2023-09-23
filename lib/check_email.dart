@@ -36,9 +36,6 @@ class CheckEmailScreen extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.logout),
               onPressed: () {
-                //var supabaseClient;
-                //final response = await supabaseClient.auth.signOut();
-                //if (response.error == null) {
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
