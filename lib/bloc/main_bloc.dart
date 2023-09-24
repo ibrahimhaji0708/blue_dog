@@ -49,12 +49,13 @@ class MainBloc extends Bloc<MainEvent, MainState> {
   Stream<MainState> mapEventToState(MainEvent event) async* {
     if (event is EmailChanged) {
       // Handle email validation and update state
-      final isEmailValid = event.email.contains('@') && event.email.contains('.');
+      //final isEmailValid = event.email.contains('@') && event.email.contains('.');
+      final isEmailValid = RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$').hasMatch(event.email);
       yield state.copyWith(email: event.email, isEmailValid: isEmailValid);
     } else if (event is PasswordChanged) {
       // Handle password validation and update state
-      final isPasswordValid = event.password.length >= 6 &&
-          RegExp(r'[!@#$%^&*(),.?":{}|<>0-9]').hasMatch(event.password);
+      //final isPasswordValid = event.password.length >= 6 && RegExp(r'[!@#$%^&*(),.?":{}|<>0-9]').hasMatch(event.password);
+      final isPasswordValid = event.password.length >= 6;
       yield state.copyWith(password: event.password, isPasswordValid: isPasswordValid);
     }
   }

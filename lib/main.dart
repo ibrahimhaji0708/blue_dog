@@ -47,6 +47,8 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mainBloc = BlocProvider.of<MainBloc>(context);
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
 
     return BlocProvider(
       create: (context) => EmailPasswordInputBloc(),
@@ -68,20 +70,22 @@ class LoginPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 70.0),
                 EmailPasswordInput(
-                  controller: TextEditingController(text: mainBloc.state.email),
+                  controller: emailController,
                   hintText: 'Email',
                   onValidationChanged: (isValid) {
-                    mainBloc.add(EmailChanged(mainBloc.state.email));
+                    mainBloc.add(EmailChanged(emailController.text));
                   },
                 ),
                 EmailPasswordInput(
                   controller:
-                      TextEditingController(text: mainBloc.state.password),
+                      //TextEditingController(text: mainBloc.state.password),
+                      passwordController, 
                   hintText: 'Password',
                   isPassword: true,
                   onValidationChanged: (isValid) {
-                    mainBloc.add(PasswordChanged(mainBloc.state.password));
+                    mainBloc.add(PasswordChanged(passwordController.text));
                   },
+                  
                 ),
                 const SizedBox(height: 20),
                 const SizedBox(height: 10.0),
@@ -102,8 +106,11 @@ class LoginPage extends StatelessWidget {
                   height: 50,
                   child: OutlinedButton(
                     onPressed: () {
-                      // Dispatch a login event to MainBloc
-                      mainBloc.add(const LoginPage() as MainEvent);
+                      if (mainBloc.state.isEmailValid &&
+                          mainBloc.state.isPasswordValid) {
+                        // Dispatch a login event to MainBloc
+                        mainBloc.add(const LoginPage() as MainEvent);
+                      }
                     },
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all(Colors.blue),
