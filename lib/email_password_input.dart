@@ -1,45 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'bloc/email_pass_input_bloc.dart';
-
 class EmailPasswordInput extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
   final bool isPassword;
+  final Function(bool isValid)? onValidationChanged;
+  final String? errorText;
 
   const EmailPasswordInput({
-    Key? key,
     required this.controller,
     required this.hintText,
-    this.isPassword = false, required Null Function(dynamic isValid) onValidationChanged,
+    this.isPassword = false,
+    this.onValidationChanged,
+    this.errorText,
+    Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final inputBloc = BlocProvider.of<EmailPasswordInputBloc>(context);
-
-    return BlocBuilder<EmailPasswordInputBloc, EmailPasswordInputState>(
-      builder: (context, state) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: controller,
-              onChanged: (text) {
-                inputBloc.validateInput(text, isPassword);
-              },
-              decoration: InputDecoration(
-                hintText: hintText,
-                errorText: state.errorText,
-                border: const OutlineInputBorder(),
-              ),
-              obscureText: isPassword,
-            ),
-            const SizedBox(height: 10), // Adjust the spacing as needed
-          ],
-        );
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        TextField(
+          controller: controller,
+          obscureText: isPassword,
+          decoration: InputDecoration(
+            hintText: hintText,
+            errorText: errorText,
+            border: OutlineInputBorder(),
+          ),
+          onChanged: (value) {
+            if (onValidationChanged != null) {
+              // You can perform your validation here and notify the parent widget.
+              bool isValid = true; // Replace this with your validation logic.
+              onValidationChanged!(isValid);
+            }
+          },
+        ),
+        SizedBox(height: 10.0), // Adjust the spacing as needed.
+      ],
     );
   }
 }
