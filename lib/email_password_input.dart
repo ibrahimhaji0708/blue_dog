@@ -26,7 +26,7 @@ class EmailPasswordInput extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hintText,
             errorText: errorText,
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
           ),
           onChanged: (value) {
             if (onValidationChanged != null) {
@@ -36,7 +36,7 @@ class EmailPasswordInput extends StatelessWidget {
             }
           },
         ),
-        SizedBox(height: 10.0), // Adjust the spacing as needed.
+        const SizedBox(height: 10.0), // Adjust the spacing as needed.
       ],
     );
   }

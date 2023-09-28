@@ -3,6 +3,7 @@ import 'package:blue_dog/email_password_input.dart';
 import 'package:blue_dog/register.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase/supabase.dart';
+//import 'package:firebase_auth/firebase_auth.dart';
 
 void main() {
   runApp(const BlueDog());
@@ -89,8 +90,6 @@ Future<void> _login(context) async {
     }
 
     if (emailError == null && passwordError == null) {
-
-
       if (password.length < 6) {
         passwordError = 'Password must be at least 6 characters long';
         showDialog(
@@ -111,67 +110,20 @@ Future<void> _login(context) async {
           ),
         );
       }
-        // try {
-          // final response = await supabase.auth.signInWithPassword(
-          //   email: email,
-          //   password: password,
-          // );
-
-          // if (response.user != null) {
-          //   // User is logged in successfully, show a success message
-          //   showDialog(
-          //     context: context,
-          //     builder: (context) => const AlertDialog(
-          //       title: Text('Logged In'),
-          //       content: Text('You are successfully logged in.'),
-          //     ),
-          //   );
-          // } else //e = error;
-          /*if (response.user != null &&
-              response.user! == 'Invalid login credentials') */
-            // Authentication failed, show an error message
-            // showDialog(
-            //   context: context,
-            //   builder: (context) => const AlertDialog(
-            //     title: Text('Error'),
-            //     content: Text('Invalid email or password. Please try again.'),
-            //   ),
-            // );
-          
-          
-            // showDialog(
-            //   context: context,
-            //   builder: (context) => const AlertDialog(
-            //     title: Text('Error'),
-            //     content: Text(
-            //         'Authentication failed. Please check your credentials.'),
-            //   ),
-            // );
-          
-        // } catch (e) {
-        //   // Handle unexpected errors
-        //   showDialog(
-        //     context: context,
-        //     builder: (context) => AlertDialog(
-        //       title: Text('Error'),
-        //       content: Text('An error occurred: $e'),
-        //     ),
-        //   );
-        // }
-      }
-    } else {
-      // Display error message for invalid email or password
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Validation Error'),
-          content: Text('Please correct the following errors:\n\n' +
-              (emailError != null ? '- $emailError\n' : '') +
-              (passwordError != null ? '- $passwordError\n' : '')),
-        ),
-      );
     }
+  } else {
+    // Display error message for invalid email or password
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Validation Error'),
+        content: Text('Please correct the following errors:\n\n' +
+            (emailError != null ? '- $emailError\n' : '') +
+            (passwordError != null ? '- $passwordError\n' : '')),
+      ),
+    );
   }
+}
 
 class BlueDog extends StatelessWidget {
   const BlueDog({super.key});
