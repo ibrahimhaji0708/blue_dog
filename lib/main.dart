@@ -3,7 +3,7 @@ import 'package:blue_dog/email_password_input.dart';
 import 'package:blue_dog/register.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase/supabase.dart';
-//import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() {
   runApp(const BlueDog());
