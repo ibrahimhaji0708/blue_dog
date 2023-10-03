@@ -1,9 +1,8 @@
 import 'package:blue_dog/forgot_password.dart';
 import 'package:blue_dog/email_password_input.dart';
 import 'package:blue_dog/register.dart';
-import 'package:blue_dog/verification.dart';
+//import 'package:blue_dog/';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase/supabase.dart';
 //import 'package:firebase_auth/firebase_auth.dart';
 
