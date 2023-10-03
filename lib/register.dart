@@ -115,7 +115,8 @@ class _RegisterUserState extends State<RegisterUser> {
                   border: OutlineInputBorder(),
                 ),
               ),
-              const SizedBox(height: 20.0),
+              //const SizedBox(height: 20.0),
+              const SizedBox(height: 10), 
               Container(
                 width: 350,
                 height: 50,
