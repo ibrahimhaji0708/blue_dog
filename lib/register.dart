@@ -1,4 +1,3 @@
-import 'package:blue_dog/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -154,11 +153,11 @@ class _RegisterUserState extends State<RegisterUser> {
                       showDialog(
                         context: context,
                         builder: (context) {
-                          return  AlertDialog(
-                            title: const Text('Registered'),
-                            content: const Text('You are successfully registered.'),
+                          return  const AlertDialog(
+                            title: Text('Registered'),
+                            content: Text('You are successfully registered.'),
                             actions: [
-                              TextButton(onPressed: Navigator.of(context).pop(), child: const Text('Ok'))
+                              //TextButton(onPressed: Navigator.of(context).pop(), child: const Text('Ok'))
                               //Navigator.of(context).push(MaterialPageRoute(builder: (context) => const HomeScreen()))
                             ],
                           );
