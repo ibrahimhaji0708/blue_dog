@@ -1,8 +1,11 @@
 import 'package:blue_dog/forgot_password.dart';
 import 'package:blue_dog/email_password_input.dart';
 import 'package:blue_dog/register.dart';
+import 'package:blue_dog/verification.dart';
 //import 'package:blue_dog/';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
 import 'package:supabase/supabase.dart';
 //import 'package:firebase_auth/firebase_auth.dart';
 
@@ -24,17 +27,6 @@ bool _emailValid = false;
 bool _passwordValid = false;
 String? emailError;
 String? passwordError;
-
-Future<void> _handleSignIn() async {
-  try {
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    // Now you can use googleUser to access user information.
-  } catch (error) {
-    // Handle sign-in errors
-    print(error);
-  }
-}
-
 
 Future<void> _login(context) async {
   if (_emailValid && _passwordValid) {

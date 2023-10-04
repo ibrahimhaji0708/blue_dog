@@ -1,7 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:blue_dog/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-//import 'package:supabase/supabase.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RegistrationState {
@@ -28,27 +27,29 @@ class RegistrationState {
   }
 }
 
-final supabase = SupabaseClient(
-  'https://ydvzfbbrjpyccxoabdxz.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkdnpmYmJyanB5Y2N4b2FiZHh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTQ3ODAwMDQsImV4cCI6MjAxMDM1NjAwNH0.wkQE09ZoNK5PQBa89Pp17CYitzf6h_kp6O1fPFfCwO4',
-);
-
-Future<void> _handleSignIn() async {
+Future<void> _handleGoogleSignIn() async {
   try {
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
+    final GoogleSignInAccount? googleUser =
+        await GoogleSignIn().signIn(); // Perform Google Sign-In
 
-    final AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-    // Now you can use googleUser to access user information.
+    if (googleUser == null) {
+      print('Google Sign-In canceled or failed.');
+    } else {
+      print('Google Sign-In successful!');
+      print('User ID: ${googleUser.id}');
+      print('User Display Name: ${googleUser.displayName}');
+      print('User Email: ${googleUser.email}');
+    }
   } catch (error) {
     // Handle sign-in errors
     print(error);
   }
 }
 
+final supabase = SupabaseClient(
+  'https://ydvzfbbrjpyccxoabdxz.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkdnpmYmJyanB5Y2N4b2FiZHh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTQ3ODAwMDQsImV4cCI6MjAxMDM1NjAwNH0.wkQE09ZoNK5PQBa89Pp17CYitzf6h_kp6O1fPFfCwO4',
+);
 
 class RegisterUser extends StatefulWidget {
   const RegisterUser({Key? key}) : super(key: key);
@@ -116,7 +117,7 @@ class _RegisterUserState extends State<RegisterUser> {
                 ),
               ),
               //const SizedBox(height: 20.0),
-              const SizedBox(height: 10), 
+              const SizedBox(height: 10),
               Container(
                 width: 350,
                 height: 50,
@@ -153,9 +154,13 @@ class _RegisterUserState extends State<RegisterUser> {
                       showDialog(
                         context: context,
                         builder: (context) {
-                          return const AlertDialog(
-                            title: Text('Registered'),
-                            content: Text('You are successfully registered.'),
+                          return  AlertDialog(
+                            title: const Text('Registered'),
+                            content: const Text('You are successfully registered.'),
+                            actions: [
+                              TextButton(onPressed: Navigator.of(context).pop(), child: const Text('Ok'))
+                              //Navigator.of(context).push(MaterialPageRoute(builder: (context) => const HomeScreen()))
+                            ],
                           );
                         },
                       );
@@ -185,11 +190,12 @@ class _RegisterUserState extends State<RegisterUser> {
               const SizedBox(height: 20),
               ElevatedButton.icon(
                 onPressed: () async {
-                  _handleSignIn();
+                  await _handleGoogleSignIn();
                   final response = await supabase.auth.signInWithOAuth(
                     Provider.google,
                     redirectTo:
                         'https://ydvzfbbrjpyccxoabdxz.supabase.co/auth/v1/callback',
+                    //'381200983373-96u7a9n6h7d4hfppq041d9jr8skkbk04.apps.googleusercontent.com',
                   );
                   if (response) {
                     // ignore: use_build_context_synchronously
