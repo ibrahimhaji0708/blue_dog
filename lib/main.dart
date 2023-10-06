@@ -6,6 +6,7 @@ import 'package:blue_dog/email_password_input.dart';
 import 'package:blue_dog/register.dart';
 import 'package:blue_dog/verification.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 void main() {
@@ -32,7 +33,10 @@ class BlueDog extends StatelessWidget {
           seedColor: const Color.fromARGB(255, 255, 255, 255),
         ),
       ),
-      home: const LoginPage(),
+      home: BlocProvider(
+        create: (context) => LoginBloc(LoginState()),
+        child: const LoginPage(),
+      ),
     );
   }
 }
@@ -50,7 +54,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool emailValid = false;
-  bool passwordValid = false; 
+  bool passwordValid = false;
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +113,7 @@ class _LoginPageState extends State<LoginPage> {
                 height: 50,
                 child: OutlinedButton(
                   onPressed: () {
-                    loginBloc.add(LoginEvent(email: 'your_email', password: 'your_password'));
+                    loginBloc.add(LoginButtonPressed());
                   },
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(Colors.blue),
