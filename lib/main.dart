@@ -1,3 +1,6 @@
+import 'package:blue_dog/bloc/auth_bloc.dart';
+import 'package:blue_dog/bloc/auth_event.dart';
+import 'package:blue_dog/bloc/auth_state.dart';
 import 'package:blue_dog/forgot_password.dart';
 import 'package:blue_dog/email_password_input.dart';
 import 'package:blue_dog/register.dart';
@@ -42,9 +45,12 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final loginBloc = LoginBloc(LoginState());
   // final mainCubit = BlocProvider.of<MainCubit>(context);
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool emailValid = false;
+  bool passwordValid = false; 
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +75,6 @@ class _LoginPageState extends State<LoginPage> {
                 controller: _passwordController,
                 hintText: 'Email',
                 onValidationChanged: (isValid) {
-                  bool emailValid = false;
                   setState(() {
                     emailValid = isValid;
                   });
@@ -80,7 +85,6 @@ class _LoginPageState extends State<LoginPage> {
                 hintText: 'Password',
                 isPassword: true,
                 onValidationChanged: (isValid) {
-                  bool passwordValid = false;
                   setState(() {
                     passwordValid = isValid;
                   });
@@ -105,7 +109,7 @@ class _LoginPageState extends State<LoginPage> {
                 height: 50,
                 child: OutlinedButton(
                   onPressed: () {
-                    //_login(context);
+                    loginBloc.add(LoginEvent(email: 'your_email', password: 'your_password'));
                   },
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(Colors.blue),

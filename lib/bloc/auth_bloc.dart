@@ -34,8 +34,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       } catch (e) {
         yield ErrorState('An error occurred: $e');
       }
-
-      Future<void> _login(context)async {
+    }
+    Future<void> login(context)async {
         if (_emailValid && _passwordValid) {
           //var supabaseClient;
           final email = _emailController.text.trim();
@@ -143,7 +143,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           );
         }
       }
-    }
   }
 }
 

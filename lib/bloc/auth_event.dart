@@ -1,6 +1,6 @@
 //import 'package:blue_dog/bloc/auth_state.dart';
 
-abstract class LoginEvent {
+class LoginEvent {
   final String email; 
   final String password;
 
