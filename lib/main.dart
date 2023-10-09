@@ -49,7 +49,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final loginBloc = LoginBloc(LoginState());
+  // final loginBloc = LoginBloc(LoginState());
   // final mainCubit = BlocProvider.of<MainCubit>(context);
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -95,6 +95,18 @@ class _LoginPageState extends State<LoginPage> {
                 },
               ),
               const SizedBox(height: 20),
+              BlocBuilder<LoginBloc, LoginState>(
+                builder: (context, state) {
+                  if (state is LoginErrorState) {
+                    return const Text(
+                      'error will show up here',
+                      style: TextStyle(color: Colors.red),
+                    );
+                  } else {
+                    return Container();
+                  }
+                },
+              ),
               const SizedBox(height: 10.0),
               TextButton(
                 onPressed: () {
@@ -113,7 +125,14 @@ class _LoginPageState extends State<LoginPage> {
                 height: 50,
                 child: OutlinedButton(
                   onPressed: () {
-                    loginBloc.add(LoginButtonPressed());
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => BlocProvider(
+                          create: (context) => LoginBloc(LoginState()),
+                          child: const RegisterUser(),
+                        ),
+                      ),
+                    );
                   },
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(Colors.blue),

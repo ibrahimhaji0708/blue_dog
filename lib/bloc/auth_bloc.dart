@@ -2,6 +2,7 @@
 
 import 'package:blue_dog/bloc/auth_event.dart';
 import 'package:blue_dog/bloc/auth_state.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase/supabase.dart';
@@ -18,20 +19,23 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<EmailChanged>(_emailChanged);
   }
 
-  void _loginPressed(
-      LoginButtonPressed event, Emitter<LoginState> emit) async {
+  void _loginPressed(LoginButtonPressed event, Emitter<LoginState> emit) async {
     emit(state.copyWith(loggingIn: true));
-    if (state.email.isEmpty || state.email.length < 5) {
+    if (state.email.isEmpty ||
+        state.email.length < 5 ||
+        (state.email == "" && EmailValidator.validate(state.email) == false)) {
       emit(state.copyWith(
           loggingIn: false,
-          errMsg: 'ur email has to be more than 5 chars long..'));
-      return;
-    }
-
-    if (state.password.length < 6) {
+          errMsg:
+              'there is an error in ur email plz fill in the details correctly.'));
+      //return;
+    } else if (state.password.length < 6) {
       emit(state.copyWith(
           loggingIn: false,
           errMsg: 'Password must be at least 6 characters long'));
+      return;
+    } else {
+      emit(state.copyWith(loggedIn: true));
       return;
     }
 
@@ -48,9 +52,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       emit(state.copyWith(
           errMsg: 'login failed plz try again..', loggingIn: false));
       return;
+    } else {
+      emit(state.copyWith(loggedIn: true, loggingIn: false));
     }
-
-    emit(state.copyWith(loggedIn: true, loggingIn: false));
   }
 
   void _checkLogin(CheckLogin event, Emitter<LoginState> emit) async {
@@ -58,7 +62,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     // .execute(); //.execute() if the login doesn't work
 
     if (userQuery.data == null || userQuery.data.isEmpty) {
-      emit(state.copyWith(errMsg: 'null'));
+      emit(state.copyWith(errMsg: 'no user found plz register ur details.'));
     }
   }
 
