@@ -1,11 +1,13 @@
+
+
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:blue_dog/bloc/auth_event.dart';
 import 'package:blue_dog/bloc/auth_state.dart';
-import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase/supabase.dart';
+import 'package:blue_dog/main.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final supabase = SupabaseClient(
@@ -21,26 +23,26 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   void _loginPressed(LoginButtonPressed event, Emitter<LoginState> emit) async {
     emit(state.copyWith(loggingIn: true));
-    if (state.email.isEmpty ||
+    if ( //state.email.isEmpty ||
         state.email.length < 5 ||
-        (state.email == "" && EmailValidator.validate(state.email) == false)) {
+            !state.email.contains('@') ||
+            !state.email.contains('.') 
+            //(EmailValidator.validate(state.email) == false)
+            ) {
+              _showErrorDialog('Invalid email address.');
       emit(state.copyWith(
-          loggingIn: false,
-          errMsg:
-              'there is an error in ur email plz fill in the details correctly.'));
-      //return;
-    } else if (state.password.length < 6) {
+        loggingIn: false,
+        
+      ));
+    } else if (state.password.length < 6 ||
+        !state.password.contains(RegExp(r'[0-9]'))) {
+          _showErrorDialog('Password must be at least 6 characters long and contain numbers.');
       emit(state.copyWith(
-          loggingIn: false,
-          errMsg: 'Password must be at least 6 characters long'));
+        loggingIn: false,
+      ));
       return;
     } else {
       emit(state.copyWith(loggedIn: true));
-      return;
-    }
-
-    if (!state.email.contains('@') || !state.email.contains('.com')) {
-      emit(state.copyWith(errMsg: 'Error in EMail', loggingIn: false));
       return;
     }
 
@@ -49,8 +51,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       password: state.password,
     );
     if (res.user == null) {
-      emit(state.copyWith(
-          errMsg: 'login failed plz try again..', loggingIn: false));
+      LoginClicked();
+      emit(state.copyWith(loggingIn: false));
       return;
     } else {
       emit(state.copyWith(loggedIn: true, loggingIn: false));
