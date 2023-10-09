@@ -1,13 +1,10 @@
-
-
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, curly_braces_in_flow_control_structures
 
 import 'package:blue_dog/bloc/auth_event.dart';
 import 'package:blue_dog/bloc/auth_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase/supabase.dart';
-import 'package:blue_dog/main.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final supabase = SupabaseClient(
@@ -22,21 +19,20 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   }
 
   void _loginPressed(LoginButtonPressed event, Emitter<LoginState> emit) async {
-    emit(state.copyWith(loggingIn: true));
-    if ( //state.email.isEmpty ||
-        state.email.length < 5 ||
-            !state.email.contains('@') ||
-            !state.email.contains('.') 
-            //(EmailValidator.validate(state.email) == false)
-            ) {
-              _showErrorDialog('Invalid email address.');
-      emit(state.copyWith(
-        loggingIn: false,
-        
-      ));
-    } else if (state.password.length < 6 ||
+    //if (event is PerformLogin) {
+      emit(state.copyWith(loggingIn: true));
+      if ((state.email.isEmpty || state.password.isEmpty) ||
+          state.email.length < 5 ||
+          (!state.email.contains('@') || !state.email.contains('.'))) {
+            emit(ShowInvalidEmailDialog('Invalid email address') as LoginState );
+        emit(state.copyWith(
+          loggingIn: false,
+        ));
+      }
+    //} 
+    else if (state.password.length < 6 ||
         !state.password.contains(RegExp(r'[0-9]'))) {
-          _showErrorDialog('Password must be at least 6 characters long and contain numbers.');
+          emit(ShowInvalidPasswordDialog('Pass must be 6 chars long') as LoginState);
       emit(state.copyWith(
         loggingIn: false,
       ));
@@ -46,12 +42,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       return;
     }
 
+    //verify auth user 
     final res = await supabase.auth.signInWithPassword(
       email: state.email,
       password: state.password,
     );
     if (res.user == null) {
-      LoginClicked();
       emit(state.copyWith(loggingIn: false));
       return;
     } else {

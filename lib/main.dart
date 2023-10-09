@@ -3,6 +3,7 @@ import 'package:blue_dog/bloc/auth_event.dart';
 import 'package:blue_dog/bloc/auth_state.dart';
 import 'package:blue_dog/email_password_input.dart';
 import 'package:blue_dog/forgot_password.dart';
+import 'package:blue_dog/home_screen.dart';
 import 'package:blue_dog/register.dart';
 import 'package:blue_dog/verification.dart';
 import 'package:flutter/material.dart';
@@ -15,25 +16,6 @@ void main() {
     // Handle the signed-in user (or null if no user is signed in)
   });
 }
-
-void _showErrorDialog(String message, BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Error'),
-      content: Text(message),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Text('OK'),
-        ),
-      ],
-    ),
-  );
-}
-
 
 class BlueDog extends StatelessWidget {
   const BlueDog({super.key});
@@ -140,18 +122,11 @@ class _LoginPageState extends State<LoginPage> {
                   builder: (context, state) {
                     return OutlinedButton(
                       onPressed: () {
-                        state.email.isNotEmpty && state.password.isNotEmpty
-                            ? () {
-                              LoginClicked();
-                                //_loginPressed(context, LoginButtonPressed());
-                                BlocProvider.of<LoginBloc>(context).add(LoginButtonPressed());
-                              }
-                            : null;
+                        BlocProvider.of<LoginBloc>(context).add(LoginButtonPressed());
+                        BlocProvider.of<LoginBloc>(context).add(CheckLogin());
                       },
                       style: ButtonStyle(
-                        backgroundColor: (state is LoggedInState)
-                            ? MaterialStateProperty.all(Colors.blue)
-                            : MaterialStateProperty.all(Colors.grey),
+                        backgroundColor: MaterialStateProperty.all(Colors.blue),
                         textStyle: MaterialStateTextStyle.resolveWith(
                           (states) => const TextStyle(color: Colors.white),
                         ),
@@ -183,5 +158,58 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+}
+
+class LoginWIdgets extends StatelessWidget {
+  const LoginWIdgets({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<LoginBloc, LoginState>(
+  listener: (context, state) {
+    if (state is ShowInvalidEmailDialog) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Error'),
+            content: const Text('error email'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    } else if (state is ShowInvalidPasswordDialog) {
+      // Show the password dialog here
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Error'),
+            content: Text('error password'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+    // Add more conditions for other dialogs if needed
+  },
+  child: const LoginPage(),
+);
+
   }
 }
