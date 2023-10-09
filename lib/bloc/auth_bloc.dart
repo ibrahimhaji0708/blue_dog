@@ -59,7 +59,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
     if (userQuery.data == null || userQuery.data.isEmpty) {
       emit(state.copyWith(errMsg: 'null'));
-    } else {}
+    }
   }
 
   void _passwordChanged(PasswordChanged event, Emitter<LoginState> emit) {
