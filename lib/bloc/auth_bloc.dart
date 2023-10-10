@@ -42,8 +42,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           loggingIn: false,
           errMsg: 'Invalid email address.',
         ));
-        return;
       }
+      return;
     }
 
     if (event.loggingIn) {
@@ -53,8 +53,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           loggingIn: false,
           errMsg: 'Invalid password.',
         ));
-        return;
       }
+      return; 
     }
 
     // api call to sign-in
