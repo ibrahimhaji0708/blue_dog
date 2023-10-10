@@ -25,16 +25,4 @@ class PerformLogin extends LoginEvent {}
 
 class LoginErrorState extends LoginEvent {}
 
-class ShowInvalidEmailDialog extends LoginEvent {
-  final String message;
-
-  ShowInvalidEmailDialog(this.message);
-}
-
-class ShowInvalidPasswordDialog extends LoginEvent {
-  final String message;
-
-  ShowInvalidPasswordDialog(this.message);
-}
-
 // Define more events for other dialogs if needed

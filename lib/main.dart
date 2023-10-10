@@ -122,8 +122,12 @@ class _LoginPageState extends State<LoginPage> {
                   builder: (context, state) {
                     return OutlinedButton(
                       onPressed: () {
-                        BlocProvider.of<LoginBloc>(context).add(LoginButtonPressed());
+                        BlocProvider.of<LoginBloc>(context)
+                            .add(LoginButtonPressed());
                         BlocProvider.of<LoginBloc>(context).add(CheckLogin());
+                        //BlocProvider.of<LoginBloc>(context).add(ShowInvalidPasswordDialog('hello') as LoginEvent);
+                        //BlocProvider.of<LoginBloc>(context).add(ShowInvalidEmailDialog('hello') as LoginEvent);
+                        //BlocProvider.of<LoginBloc>(context).add(ShowEmptyFieldsDialog('etc') as LoginEvent);
                       },
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all(Colors.blue),
@@ -167,49 +171,69 @@ class LoginWIdgets extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocListener<LoginBloc, LoginState>(
-  listener: (context, state) {
-    if (state is ShowInvalidEmailDialog) {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Error'),
-            content: const Text('error email'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
-                },
-                child: const Text('OK'),
-              ),
-            ],
+      listener: (context, state) {
+        if (state is ShowInvalidEmailDialog) {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: const Text('Error'),
+                content: Text(state.message),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close the dialog
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
           );
-        },
-      );
-    } else if (state is ShowInvalidPasswordDialog) {
-      // Show the password dialog here
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Error'),
-            content: Text('error password'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
-                },
-                child: const Text('OK'),
-              ),
-            ],
+        } else if (state is ShowInvalidPasswordDialog) {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: const Text('Error'),
+                content: Text(state.message),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close the dialog
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
           );
-        },
-      );
-    }
-    // Add more conditions for other dialogs if needed
-  },
-  child: const LoginPage(),
-);
-
+        } else if (state is ShowEmptyFieldsDialog) {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: const Text('Error'),
+                content: Text(state.message),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close the dialog
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        } else {
+          (state is LoggedInState);
+          Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const HomeScreen()));
+        }
+        //const LoginPage();
+      },
+      child: const LoginPage(),
+    );
   }
 }

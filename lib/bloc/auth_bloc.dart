@@ -19,48 +19,74 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   }
 
   void _loginPressed(LoginButtonPressed event, Emitter<LoginState> emit) async {
-    //if (event is PerformLogin) {
-      emit(state.copyWith(loggingIn: true));
-      if ((state.email.isEmpty || state.password.isEmpty) ||
-          state.email.length < 5 ||
-          (!state.email.contains('@') || !state.email.contains('.'))) {
-            emit(ShowInvalidEmailDialog('Invalid email address') as LoginState );
-        emit(state.copyWith(
-          loggingIn: false,
-        ));
-      }
-    //} 
-    else if (state.password.length < 6 ||
+    emit(state.copyWith(loggingIn: true));
+    //
+    if (state.email.isEmpty && state.password.isEmpty) {
+      emit(ShowInvalidEmailDialog('Invalid email address.'));
+      emit(state.copyWith(
+        loggingIn: false,
+      ));
+      return;
+    }
+    //
+    if (state.email.length < 5 ||
+        (!state.email.contains('@') || !state.email.contains('.'))) {
+      emit(ShowInvalidEmailDialog('Please enter the email address correctly.'));
+      emit(state.copyWith(
+        loggingIn: false,
+      ));
+      return;
+    }
+
+    if (state.email.isEmpty || state.password.isEmpty) {
+      emit(ShowEmptyFieldsDialog('Please fill in all fields'));
+      // emit(state.copyWith(
+      //   loggingIn: false,
+      // ));
+      return;
+    }
+
+    if (state.password.length < 6 ||
         !state.password.contains(RegExp(r'[0-9]'))) {
-          emit(ShowInvalidPasswordDialog('Pass must be 6 chars long') as LoginState);
+      emit(ShowInvalidPasswordDialog('Pass must be 6 chars long'));
       emit(state.copyWith(
         loggingIn: false,
       ));
       return;
     } else {
-      emit(state.copyWith(loggedIn: true));
+      //emit(state.copyWith(loggedIn: true));
+      final res = await supabase.auth.signInWithPassword(
+        email: state.email,
+        password: state.password,
+      );
+      if (res.user == null) {
+        emit(state.copyWith(loggingIn: false));
+        return;
+      } else {
+        emit(state.copyWith(loggedIn: true, loggingIn: false));
+      }
       return;
     }
 
-    //verify auth user 
-    final res = await supabase.auth.signInWithPassword(
-      email: state.email,
-      password: state.password,
-    );
-    if (res.user == null) {
-      emit(state.copyWith(loggingIn: false));
-      return;
-    } else {
-      emit(state.copyWith(loggedIn: true, loggingIn: false));
-    }
+    //verify auth user
   }
 
   void _checkLogin(CheckLogin event, Emitter<LoginState> emit) async {
-    final userQuery = await supabase.from('users').select().eq('email', event);
-    // .execute(); //.execute() if the login doesn't work
+    try {
+      final userQuery = await supabase
+          .from('users')
+          .select()
+          .eq('email', event); //.execute();
 
-    if (userQuery.data == null || userQuery.data.isEmpty) {
-      emit(state.copyWith(errMsg: 'no user found plz register ur details.'));
+      if (userQuery.data == null || userQuery.data.isEmpty) {
+        emit(state.copyWith(
+            errMsg: 'No user found. Please register your details.'));
+      } else {
+        // Handle the case when a user is found.
+      }
+    } catch (e) {
+      // Handle errors here, e.g., network errors or unexpected exceptions.
+      emit(state.copyWith(errMsg: 'An error occurred during login.'));
     }
   }
 
@@ -82,25 +108,6 @@ class LoginPage extends StatelessWidget {
       create: (context) => LoginBloc(
         LoginState(),
       ),
-      child: const LoginPage(),
-    );
-  }
-}
-
-class LoginWidgets extends StatelessWidget {
-  const LoginWidgets({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocListener<LoginBloc, LoginState>(
-      //listenWhen: (previous, current) => previous.loggedIn != current.loggedIn,
-      listener: (context, state) {
-        // if (state.loggedIn) {
-        //   Navigator.pushNamed(context, '/home');
-        // } else {
-        //   Navigator.pushNamed(context, '/login');
-        // }
-      },
       child: const LoginPage(),
     );
   }

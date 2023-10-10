@@ -34,8 +34,26 @@ class LoginErrorState extends LoginState {
 // class LoadingState extends LoginState {}
 
 class LoggedInState extends LoginState {
-  //final String message;
+  final String message;
 
-  //LoggedInState(this.message);
+  LoggedInState(this.message);
+}
+
+class ShowInvalidEmailDialog extends LoginState {
+  final String message;
+
+  ShowInvalidEmailDialog(this.message);
+}
+
+class ShowInvalidPasswordDialog extends LoginState {
+  final String message;
+
+  ShowInvalidPasswordDialog(this.message);
+}
+
+class ShowEmptyFieldsDialog extends LoginState {
+  final String message;
+
+  ShowEmptyFieldsDialog(this.message);
 }
 
