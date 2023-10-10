@@ -24,36 +24,3 @@ class LoginState {
     );
   }
 }
-
-class LoginErrorState extends LoginState {
-  final String message;
-
-  LoginErrorState(this.message);
-}
-
-// class LoadingState extends LoginState {}
-
-class LoggedInState extends LoginState {
-  final String message;
-
-  LoggedInState(this.message);
-}
-
-class ShowInvalidEmailDialog extends LoginState {
-  final String message;
-
-  ShowInvalidEmailDialog(this.message);
-}
-
-class ShowInvalidPasswordDialog extends LoginState {
-  final String message;
-
-  ShowInvalidPasswordDialog(this.message);
-}
-
-class ShowEmptyFieldsDialog extends LoginState {
-  final String message;
-
-  ShowEmptyFieldsDialog(this.message);
-}
-

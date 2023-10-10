@@ -122,12 +122,10 @@ class _LoginPageState extends State<LoginPage> {
                   builder: (context, state) {
                     return OutlinedButton(
                       onPressed: () {
-                        BlocProvider.of<LoginBloc>(context)
-                            .add(LoginButtonPressed());
+                        BlocProvider.of<LoginBloc>(context).add(
+                            LoginButtonPressed(
+                                loggingIn: false, loggedIn: true));
                         BlocProvider.of<LoginBloc>(context).add(CheckLogin());
-                        //BlocProvider.of<LoginBloc>(context).add(ShowInvalidPasswordDialog('hello') as LoginEvent);
-                        //BlocProvider.of<LoginBloc>(context).add(ShowInvalidEmailDialog('hello') as LoginEvent);
-                        //BlocProvider.of<LoginBloc>(context).add(ShowEmptyFieldsDialog('etc') as LoginEvent);
                       },
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all(Colors.blue),
@@ -172,66 +170,32 @@ class LoginWIdgets extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<LoginBloc, LoginState>(
       listener: (context, state) {
-        if (state is ShowInvalidEmailDialog) {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: const Text('Error'),
-                content: Text(state.message),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(); // Close the dialog
-                    },
-                    child: const Text('OK'),
-                  ),
-                ],
-              );
-            },
-          );
-        } else if (state is ShowInvalidPasswordDialog) {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: const Text('Error'),
-                content: Text(state.message),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(); // Close the dialog
-                    },
-                    child: const Text('OK'),
-                  ),
-                ],
-              );
-            },
-          );
-        } else if (state is ShowEmptyFieldsDialog) {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: const Text('Error'),
-                content: Text(state.message),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(); // Close the dialog
-                    },
-                    child: const Text('OK'),
-                  ),
-                ],
-              );
-            },
-          );
-        } else {
-          (state is LoggedInState);
-          Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const HomeScreen()));
+        if (state.loggingIn == false) {
+          // ignore: unnecessary_null_comparison
+          if (state.errMsg != null) {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: const Text('Error'),
+                  content: Text(state.errMsg),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); 
+                      },
+                      child: const Text('OK'),
+                    ),
+                  ],
+                );
+              },
+            );
+          } else if (state.loggedIn) {
+            //successful login
+            Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const HomeScreen()));
+          }
         }
-        //const LoginPage();
       },
       child: const LoginPage(),
     );

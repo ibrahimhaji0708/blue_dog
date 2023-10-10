@@ -2,9 +2,22 @@
 
 import 'package:blue_dog/bloc/auth_event.dart';
 import 'package:blue_dog/bloc/auth_state.dart';
+import 'package:blue_dog/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase/supabase.dart';
+
+class LoginPageAbc extends StatelessWidget {
+  const LoginPageAbc({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => LoginBloc(LoginState()),
+      child: const LoginPage(),
+    );
+  }
+}
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final supabase = SupabaseClient(
@@ -20,55 +33,59 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   void _loginPressed(LoginButtonPressed event, Emitter<LoginState> emit) async {
     emit(state.copyWith(loggingIn: true));
-    //
-    if (state.email.isEmpty && state.password.isEmpty) {
-      emit(ShowInvalidEmailDialog('Invalid email address.'));
-      emit(state.copyWith(
-        loggingIn: false,
-      ));
-      return;
-    }
-    //
-    if (state.email.length < 5 ||
-        (!state.email.contains('@') || !state.email.contains('.'))) {
-      emit(ShowInvalidEmailDialog('Please enter the email address correctly.'));
-      emit(state.copyWith(
-        loggingIn: false,
-      ));
-      return;
-    }
-
-    if (state.email.isEmpty || state.password.isEmpty) {
-      emit(ShowEmptyFieldsDialog('Please fill in all fields'));
-      // emit(state.copyWith(
-      //   loggingIn: false,
-      // ));
-      return;
-    }
-
-    if (state.password.length < 6 ||
-        !state.password.contains(RegExp(r'[0-9]'))) {
-      emit(ShowInvalidPasswordDialog('Pass must be 6 chars long'));
-      emit(state.copyWith(
-        loggingIn: false,
-      ));
-      return;
-    } else {
-      //emit(state.copyWith(loggedIn: true));
-      final res = await supabase.auth.signInWithPassword(
-        email: state.email,
-        password: state.password,
-      );
-      if (res.user == null) {
-        emit(state.copyWith(loggingIn: false));
+    if (event.loggingIn) {
+      if (state.email.isEmpty ||
+          state.password.isEmpty ||
+          state.email.length < 5 ||
+          (!state.email.contains('@') || !state.email.contains('.'))) {
+        emit(state.copyWith(
+          loggingIn: false,
+          errMsg: 'Invalid email address.',
+        ));
         return;
-      } else {
-        emit(state.copyWith(loggedIn: true, loggingIn: false));
       }
-      return;
     }
 
-    //verify auth user
+    if (event.loggingIn) {
+      if (state.password.length < 6 ||
+          !state.password.contains(RegExp(r'[0-9]'))) {
+        emit(state.copyWith(
+          loggingIn: false,
+          errMsg: 'Invalid password.',
+        ));
+        return;
+      }
+    }
+
+    // api call to sign-in
+    // if (event.loggingIn) {
+    final res = await supabase.auth.signInWithPassword(
+      email: state.email,
+      password: state.password,
+    );
+    try {
+      if (event.loggingIn) {
+        if (res.user != null) {
+          // 3rd
+          emit(state.copyWith(
+            loggedIn: true,
+            loggingIn: false,
+            errMsg: 'You have successfully logged in.',
+          ));
+        } else {
+          if (event.loggedIn && state.loggingIn) {
+            // 4th
+            emit(state.copyWith(
+                loggedIn: false,
+                loggingIn: false,
+                errMsg: 'Invalid details. plz register if u r a new user.'));
+          }
+        }
+      }
+    } catch (e) {
+      print('no user found : $e');
+    }
+    return;
   }
 
   void _checkLogin(CheckLogin event, Emitter<LoginState> emit) async {
@@ -76,17 +93,33 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       final userQuery = await supabase
           .from('users')
           .select()
-          .eq('email', event); //.execute();
+          .eq('email', event)
+          .eq('password', event); //.execute();
 
       if (userQuery.data == null || userQuery.data.isEmpty) {
+        // else in 5th
         emit(state.copyWith(
+            loggingIn: false,
+            loggedIn: false,
             errMsg: 'No user found. Please register your details.'));
       } else {
-        // Handle the case when a user is found.
+        if (state.loggedIn && state.loggingIn) {
+          //5th
+          // Handle the case when a user is found.
+          emit(state.copyWith(
+              loggedIn: true,
+              loggingIn: false,
+              errMsg: 'You have successfully logged In.'));
+        }
       }
     } catch (e) {
       // Handle errors here, e.g., network errors or unexpected exceptions.
-      emit(state.copyWith(errMsg: 'An error occurred during login.'));
+      print('authentificaion faild: $e');
+      emit(state.copyWith(
+        loggedIn: false,
+        loggingIn: false,
+        errMsg: 'An error occurred during login.',
+      ));
     }
   }
 
@@ -96,19 +129,5 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   void _emailChanged(EmailChanged event, Emitter<LoginState> emit) {
     emit(state.copyWith(email: event.email));
-  }
-}
-
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => LoginBloc(
-        LoginState(),
-      ),
-      child: const LoginPage(),
-    );
   }
 }

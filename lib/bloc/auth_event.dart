@@ -14,15 +14,11 @@ class PasswordChanged extends LoginEvent {
   PasswordChanged({required this.password});
 }
 
-class LoginButtonPressed extends LoginEvent {}
+class LoginButtonPressed extends LoginEvent {
+  final bool loggingIn; 
+  final bool loggedIn; 
 
-class LoginClickedToVerifyAuth extends LoginEvent {}
+  LoginButtonPressed({required this.loggingIn, required this.loggedIn});
+}
 
 class CheckLogin extends LoginEvent {}
-
-
-class PerformLogin extends LoginEvent {}
-
-class LoginErrorState extends LoginEvent {}
-
-// Define more events for other dialogs if needed
