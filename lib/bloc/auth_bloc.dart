@@ -35,46 +35,47 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   }
 
   void _loginPressed(LoginButtonPressed event, Emitter<LoginState> emit) async {
-    emit(state.copyWith(loggingIn: false));
-    if ((state.email.isEmpty || state.password.isEmpty) && state.loggingIn) {
+    emit(state.copyWith(loggingIn: true, loggedIn: true));
+    if ((event.email.isEmpty && event.password.isEmpty)) {
       emit(state.copyWith(
         errMsg: 'Plz fill in your details and try again',
+        loggingIn: false,
       ));
-    }
-
-    if (state.loggingIn &&
-        (state.email.length < 5 || !state.email.contains('@'))) {
-      emit(state.copyWith(errMsg: 'Invalid email address'));
-    }
-
-    //if (state.loggingIn) {
-    if ((state.password.length < 6 ||
-            !state.password.contains(RegExp(r'[0-9]'))) &&
-        state.loggingIn) {
+      return;
+    } else if ((event.email.length < 5 || !event.email.contains('@'))) {
       emit(state.copyWith(
-        errMsg: 'Invalid password.',
+        //errMsg: 'Invalid email address',
+        loggingIn: false, 
       ));
-    }
-    //}
+    } else if ((event.password.length < 6 ||
+        !event.password.contains(RegExp(r'[0-9]')))) {
+      emit(state.copyWith(
+        //errMsg: 'Invalid password.',
+        loggingIn: false,
+      ));
+    } else {
+      final res = await http.post(
+          Uri.parse('https://ydvzfbbrjpyccxoabdxz.supabase.co/auth/v1.signin'),
+          body: {
+            'email': state.email,
+            'password': state.password,
+          });
 
-    // api call to sign-in
-    final res = await http.post(
-        Uri.parse('https://ydvzfbbrjpyccxoabdxz.supabase.co/auth/v1.signin'),
-        body: {
-          'email': state.email,
-          'password': state.password,
-        });
-    if (res.statusCode == 200) {
-      final user = json.decode(res.body)['user'];
+      // api call to sign-in
 
-      if (user != null && !state.loggingIn) {
-        emit(state.copyWith(
-          errMsg: null,
-        ));
-      } else {
-        emit(state.copyWith(
-          errMsg: 'Invalid details. plz register if u r a new user.',
-        ));
+      if (res.statusCode == 200) {
+        final user = json.decode(res.body)['user'];
+
+        if (user != null) {
+          emit(state.copyWith(
+            loggedIn: true,
+            errMsg: 'successfully loggedIn.',
+          ));
+        } else {
+          emit(state.copyWith(
+            errMsg: 'Invalid details. plz register if u r a new user.',
+          ));
+        }
       }
     }
   }

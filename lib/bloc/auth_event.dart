@@ -12,6 +12,11 @@ class PasswordChanged extends LoginEvent {
   PasswordChanged({required this.password});
 }
 
-class LoginButtonPressed extends LoginEvent {}
+class LoginButtonPressed extends LoginEvent {
+  final String email;
+  final String password;
+
+  LoginButtonPressed({required this.email, required this.password});
+}
 
 class CheckLogin extends LoginEvent {}

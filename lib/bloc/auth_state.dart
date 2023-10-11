@@ -10,7 +10,7 @@ class LoginState {
     this.password = '',
     this.loggingIn = false,
     this.errMsg = '',
-    this.loggedIn = true,
+    this.loggedIn = false,
   });
 
   LoginState copyWith(

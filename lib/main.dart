@@ -120,19 +120,49 @@ class _LoginPageState extends State<LoginPage> {
                 height: 50,
                 child: BlocBuilder<LoginBloc, LoginState>(
                   builder: (context, state) {
-                    return OutlinedButton(
-                      onPressed: () {
-                        BlocProvider.of<LoginBloc>(context).add(
-                            LoginButtonPressed());
-                        BlocProvider.of<LoginBloc>(context).add(CheckLogin());
+                    return BlocListener<LoginBloc, LoginState>(
+                      listener: (context, state) {
+                        if (state.errMsg != null) {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: const Text('Error'),
+                                content: Text(state.errMsg),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text('OK'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        } else if (state.loggedIn) {
+                          (state.loggingIn);
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => const HomeScreen()));
+                        }
                       },
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(Colors.blue),
-                        textStyle: MaterialStateTextStyle.resolveWith(
-                          (states) => const TextStyle(color: Colors.white),
+                      child: OutlinedButton(
+                        onPressed: () {
+                          BlocProvider.of<LoginBloc>(context).add(
+                              LoginButtonPressed(
+                                  email: state.email,
+                                  password: state.password));
+                          BlocProvider.of<LoginBloc>(context).add(CheckLogin());
+                        },
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all(Colors.blue),
+                          textStyle: MaterialStateTextStyle.resolveWith(
+                            (states) => const TextStyle(color: Colors.white),
+                          ),
                         ),
+                        child: const Text('Login'),
                       ),
-                      child: const Text('Login'),
                     );
                   },
                 ),
@@ -158,44 +188,6 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class LoginWIdgets extends StatelessWidget {
-  const LoginWIdgets({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocListener<LoginBloc, LoginState>(
-      listener: (context, state) {
-        // ignore: unnecessary_null_comparison
-        if ((!state.loggedIn || state.loggingIn ) && state.errMsg != null) {
-          debugPrint('showing dialog');
-          showDialog(
-            context: context,
-            builder: (context) {
-              debugPrint('Building AlertDialog');
-              return AlertDialog(
-                title: const Text('Error'),
-                content: Text(state.errMsg),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('OK'),
-                  ),
-                ],
-              );
-            },
-          );
-        } else if (!state.loggingIn) {
-          Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const HomeScreen()));
-        }
-      },
-      child: const LoginPage(),
     );
   }
 }
