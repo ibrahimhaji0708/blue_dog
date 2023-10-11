@@ -1,11 +1,14 @@
 // ignore_for_file: use_build_context_synchronously, curly_braces_in_flow_control_structures
 
+import 'dart:convert';
+
 import 'package:blue_dog/bloc/auth_event.dart';
 import 'package:blue_dog/bloc/auth_state.dart';
 import 'package:blue_dog/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase/supabase.dart';
+import 'package:http/http.dart' as http;
 
 class LoginPageAbc extends StatelessWidget {
   const LoginPageAbc({super.key});
@@ -32,60 +35,49 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   }
 
   void _loginPressed(LoginButtonPressed event, Emitter<LoginState> emit) async {
-    emit(state.copyWith(loggingIn: true));
-    if (event.loggingIn) {
+    //emit(state.copyWith(loggingIn: true));
+    if (state.loggingIn) {
       if (state.email.isEmpty ||
           state.password.isEmpty ||
           state.email.length < 5 ||
           (!state.email.contains('@') || !state.email.contains('.'))) {
         emit(state.copyWith(
-          loggingIn: false,
           errMsg: 'Invalid email address.',
+        ));
+      }
+      //return;
+    }
+
+    if (state.loggingIn) {
+      if (state.password.length < 6 ||
+          !state.password.contains(RegExp(r'[0-9]'))) {
+        emit(state.copyWith(
+          errMsg: 'Invalid password.',
         ));
       }
       return;
     }
 
-    if (event.loggingIn) {
-      if (state.password.length < 6 ||
-          !state.password.contains(RegExp(r'[0-9]'))) {
+    // api call to sign-in
+    final res = await http.post(
+        Uri.parse('https://ydvzfbbrjpyccxoabdxz.supabase.co/auth/v1.signin'),
+        body: {
+          'email': state.email,
+          'password': state.password,
+        });
+    if (res.statusCode == 200) {
+      final user = json.decode(res.body)['user'];
+
+      if (user != null) {
         emit(state.copyWith(
-          loggingIn: false,
-          errMsg: 'Invalid password.',
+          errMsg: 'You have successfully logged in.',
+        ));
+      } else {
+        emit(state.copyWith(
+          errMsg: 'Invalid details. plz register if u r a new user.',
         ));
       }
-      return; 
     }
-
-    // api call to sign-in
-    // if (event.loggingIn) {
-    final res = await supabase.auth.signInWithPassword(
-      email: state.email,
-      password: state.password,
-    );
-    try {
-      if (event.loggingIn) {
-        if (res.user != null) {
-          // 3rd
-          emit(state.copyWith(
-            loggedIn: true,
-            loggingIn: false,
-            errMsg: 'You have successfully logged in.',
-          ));
-        } else {
-          if (event.loggedIn && state.loggingIn) {
-            // 4th
-            emit(state.copyWith(
-                loggedIn: false,
-                loggingIn: false,
-                errMsg: 'Invalid details. plz register if u r a new user.'));
-          }
-        }
-      }
-    } catch (e) {
-      print('no user found : $e');
-    }
-    return;
   }
 
   void _checkLogin(CheckLogin event, Emitter<LoginState> emit) async {
@@ -93,31 +85,21 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       final userQuery = await supabase
           .from('users')
           .select()
-          .eq('email', event)
-          .eq('password', event); //.execute();
+          .eq('email', event); //.execute();
 
-      if (userQuery.data == null || userQuery.data.isEmpty) {
-        // else in 5th
+      if (userQuery == null || userQuery.isEmpty) {
         emit(state.copyWith(
-            loggingIn: false,
-            loggedIn: false,
             errMsg: 'No user found. Please register your details.'));
       } else {
-        if (state.loggedIn && state.loggingIn) {
-          //5th
-          // Handle the case when a user is found.
-          emit(state.copyWith(
-              loggedIn: true,
-              loggingIn: false,
-              errMsg: 'You have successfully logged In.'));
-        }
+        emit(
+          state.copyWith(
+            errMsg: 'You have successfully logged In.',
+          ),
+        );
       }
     } catch (e) {
-      // Handle errors here, e.g., network errors or unexpected exceptions.
       print('authentificaion faild: $e');
       emit(state.copyWith(
-        loggedIn: false,
-        loggingIn: false,
         errMsg: 'An error occurred during login.',
       ));
     }

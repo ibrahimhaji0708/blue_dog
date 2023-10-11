@@ -41,6 +41,7 @@ dependencies:
   google_sign_in: ^6.1.5
   bloc: ^8.1.2
   email_validator: ^2.1.17
+  http: ^1.1.0
   # firebase_auth: ^4.10.0
   # google_sign_in: ^6.1.5
   

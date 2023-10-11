@@ -123,8 +123,7 @@ class _LoginPageState extends State<LoginPage> {
                     return OutlinedButton(
                       onPressed: () {
                         BlocProvider.of<LoginBloc>(context).add(
-                            LoginButtonPressed(
-                                loggingIn: false, loggedIn: true));
+                            LoginButtonPressed());
                         BlocProvider.of<LoginBloc>(context).add(CheckLogin());
                       },
                       style: ButtonStyle(
@@ -170,31 +169,30 @@ class LoginWIdgets extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<LoginBloc, LoginState>(
       listener: (context, state) {
-        if (state.loggingIn == false) {
-          // ignore: unnecessary_null_comparison
-          if (state.errMsg != null) {
-            showDialog(
-              context: context,
-              builder: (context) {
-                return AlertDialog(
-                  title: const Text('Error'),
-                  content: Text(state.errMsg),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(); 
-                      },
-                      child: const Text('OK'),
-                    ),
-                  ],
-                );
-              },
-            );
-          } else if (state.loggedIn) {
-            //successful login
-            Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const HomeScreen()));
-          }
+        // ignore: unnecessary_null_comparison
+        if ((!state.loggedIn || !state.loggingIn) && state.errMsg != null) {
+          debugPrint('showing dialog');
+          showDialog(
+            context: context,
+            builder: (context) {
+              debugPrint('Building AlertDialog');
+              return AlertDialog(
+                title: const Text('Error'),
+                content: Text(state.errMsg),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        } else if (state.loggedIn) {
+          Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const HomeScreen()));
         }
       },
       child: const LoginPage(),

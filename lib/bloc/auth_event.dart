@@ -15,10 +15,10 @@ class PasswordChanged extends LoginEvent {
 }
 
 class LoginButtonPressed extends LoginEvent {
-  final bool loggingIn; 
-  final bool loggedIn; 
+  // final bool loggingIn; 
+  // final bool loggedIn; 
 
-  LoginButtonPressed({required this.loggingIn, required this.loggedIn});
+  // LoginButtonPressed({required this.loggingIn, required this.loggedIn});
 }
 
 class CheckLogin extends LoginEvent {}
