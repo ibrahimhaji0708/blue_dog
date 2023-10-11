@@ -35,28 +35,27 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   }
 
   void _loginPressed(LoginButtonPressed event, Emitter<LoginState> emit) async {
-    //emit(state.copyWith(loggingIn: true));
-    if (state.loggingIn) {
-      if (state.email.isEmpty ||
-          state.password.isEmpty ||
-          state.email.length < 5 ||
-          (!state.email.contains('@') || !state.email.contains('.'))) {
-        emit(state.copyWith(
-          errMsg: 'Invalid email address.',
-        ));
-      }
-      //return;
+    emit(state.copyWith(loggingIn: false));
+    if ((state.email.isEmpty || state.password.isEmpty) && state.loggingIn) {
+      emit(state.copyWith(
+        errMsg: 'Plz fill in your details and try again',
+      ));
     }
 
-    if (state.loggingIn) {
-      if (state.password.length < 6 ||
-          !state.password.contains(RegExp(r'[0-9]'))) {
-        emit(state.copyWith(
-          errMsg: 'Invalid password.',
-        ));
-      }
-      return;
+    if (state.loggingIn &&
+        (state.email.length < 5 || !state.email.contains('@'))) {
+      emit(state.copyWith(errMsg: 'Invalid email address'));
     }
+
+    //if (state.loggingIn) {
+    if ((state.password.length < 6 ||
+            !state.password.contains(RegExp(r'[0-9]'))) &&
+        state.loggingIn) {
+      emit(state.copyWith(
+        errMsg: 'Invalid password.',
+      ));
+    }
+    //}
 
     // api call to sign-in
     final res = await http.post(
@@ -68,9 +67,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     if (res.statusCode == 200) {
       final user = json.decode(res.body)['user'];
 
-      if (user != null) {
+      if (user != null && !state.loggingIn) {
         emit(state.copyWith(
-          errMsg: 'You have successfully logged in.',
+          errMsg: null,
         ));
       } else {
         emit(state.copyWith(

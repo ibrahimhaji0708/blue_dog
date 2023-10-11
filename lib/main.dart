@@ -170,7 +170,7 @@ class LoginWIdgets extends StatelessWidget {
     return BlocListener<LoginBloc, LoginState>(
       listener: (context, state) {
         // ignore: unnecessary_null_comparison
-        if ((!state.loggedIn || !state.loggingIn) && state.errMsg != null) {
+        if ((!state.loggedIn || state.loggingIn ) && state.errMsg != null) {
           debugPrint('showing dialog');
           showDialog(
             context: context,
@@ -190,7 +190,7 @@ class LoginWIdgets extends StatelessWidget {
               );
             },
           );
-        } else if (state.loggedIn) {
+        } else if (!state.loggingIn) {
           Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => const HomeScreen()));
         }

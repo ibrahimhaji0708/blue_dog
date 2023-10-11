@@ -1,5 +1,3 @@
-//import 'package:blue_dog/bloc/auth_state.dart';
-
 class LoginEvent {}
 
 class EmailChanged extends LoginEvent {
@@ -14,11 +12,6 @@ class PasswordChanged extends LoginEvent {
   PasswordChanged({required this.password});
 }
 
-class LoginButtonPressed extends LoginEvent {
-  // final bool loggingIn; 
-  // final bool loggedIn; 
-
-  // LoginButtonPressed({required this.loggingIn, required this.loggedIn});
-}
+class LoginButtonPressed extends LoginEvent {}
 
 class CheckLogin extends LoginEvent {}
