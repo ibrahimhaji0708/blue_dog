@@ -122,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                   builder: (context, state) {
                     return BlocListener<LoginBloc, LoginState>(
                       listener: (context, state) {
-                        if (state.errMsg != null) {
+                        if (state.errMsg != null && state.loggingIn == false) {
                           showDialog(
                             context: context,
                             builder: (context) {
@@ -142,8 +142,10 @@ class _LoginPageState extends State<LoginPage> {
                           );
                         } else if (state.loggedIn) {
                           (state.loggingIn);
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const HomeScreen()));
+                          Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                  builder: (context) => const HomeScreen()),
+                              (route) => false);
                         }
                       },
                       child: OutlinedButton(
