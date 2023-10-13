@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously, curly_braces_in_flow_control_structures
+// ignore_for_file: use_build_context_synchronously
 
 import 'dart:convert';
 
@@ -16,9 +16,7 @@ class LoginPageAbc extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => LoginBloc(LoginState()),
-      child: const LoginPage(),
-    );
+        create: (context) => LoginBloc(LoginState()), child: const LoginPage());
   }
 }
 
@@ -43,17 +41,11 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       ));
       return;
     }
-    if ((event.email.length < 5 || !event.email.contains('@'))) {
+    if ((event.email.length < 5 || !event.email.contains('@')) ||
+        (event.password.length < 6 ||
+            !event.password.contains(RegExp(r'[0-9]')))) {
       emit(state.copyWith(
-        errMsg: 'Invalid email address',
-        loggingIn: false,
-      ));
-      return;
-    }
-    if ((event.password.length < 6 ||
-        !event.password.contains(RegExp(r'[0-9]')))) {
-      emit(state.copyWith(
-        errMsg: 'Invalid password.',
+        errMsg: 'Invalid email address or pasword.',
         loggingIn: false,
       ));
       return;
@@ -64,9 +56,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         body: {
           'email': state.email,
           'password': state.password,
-        });
+        }); 
 
-    if (res.statusCode == 200) {
+    if (res.statusCode == 200 && res.request != null) {
       final user = json.decode(res.body)['user'];
 
       if (user != null) {
@@ -83,23 +75,40 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         ));
         return;
       }
+    } else {
+      emit(state.copyWith(
+        errMsg: 'An error occurred during login.',
+        loggingIn: false,
+      ));
     }
   }
 
   void _checkLogin(CheckLogin event, Emitter<LoginState> emit) async {
     try {
+      if (event.email.isEmpty || event.password.isEmpty) {
+        emit(state.copyWith(
+          loggingIn: false,
+          errMsg: 'Plz fill in your details and try again',
+        ));
+        return;
+      }
       final userQuery = await supabase
           .from('users')
           .select()
-          .eq('email', event); //.execute();
+          .eq('email', event.email)
+          .eq('password', event.password);
 
-      if (userQuery == null || userQuery.isEmpty) {
+      if (userQuery != null && userQuery.data.isNotEmpty) {
         emit(state.copyWith(
-            errMsg: 'No user found. Please register your details.'));
+          loggingIn: false,
+          loggedIn: true,
+        ));
+        return;
       } else {
         emit(
           state.copyWith(
-            errMsg: 'You have successfully logged In.',
+            loggingIn: true,
+            errMsg: 'No user found. Please register your details.',
           ),
         );
       }
@@ -107,6 +116,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       print('authentificaion faild: $e');
       emit(state.copyWith(
         errMsg: 'An error occurred during login.',
+        loggingIn: false,
       ));
     }
   }

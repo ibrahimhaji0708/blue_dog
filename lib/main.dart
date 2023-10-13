@@ -83,8 +83,6 @@ class _LoginPageState extends State<LoginPage> {
                 hintText: 'Email',
                 onValidationChanged: (isValid) {
                   emailValid = isValid;
-                  BlocProvider.of<LoginBloc>(context)
-                      .add(EmailChanged(email: ''));
                 },
               ),
               const SizedBox(height: 5),
@@ -94,8 +92,6 @@ class _LoginPageState extends State<LoginPage> {
                 isPassword: true,
                 onValidationChanged: (isValid) {
                   passwordValid = isValid;
-                  BlocProvider.of<LoginBloc>(context)
-                      .add(PasswordChanged(password: ''));
                 },
               ),
               const SizedBox(height: 20),
@@ -120,9 +116,9 @@ class _LoginPageState extends State<LoginPage> {
                 height: 50,
                 child: BlocBuilder<LoginBloc, LoginState>(
                   builder: (context, state) {
-                    return BlocListener<LoginBloc, LoginState>(
-                      listener: (context, state) {
-                        if (state.errMsg != null && state.loggingIn == false) {
+                    return OutlinedButton(
+                      onPressed: () {
+                        if (state.errMsg != null) {
                           showDialog(
                             context: context,
                             builder: (context) {
@@ -141,30 +137,26 @@ class _LoginPageState extends State<LoginPage> {
                             },
                           );
                         } else if (state.loggedIn) {
-                          (state.loggingIn);
-                          Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                  builder: (context) => const HomeScreen()),
-                              (route) => false);
-                        }
-                      },
-                      child: OutlinedButton(
-                        onPressed: () {
-                          BlocProvider.of<LoginBloc>(context).add(
-                              LoginButtonPressed(
-                                  email: state.email,
-                                  password: state.password));
-                          BlocProvider.of<LoginBloc>(context).add(CheckLogin());
-                        },
-                        style: ButtonStyle(
-                          backgroundColor:
-                              MaterialStateProperty.all(Colors.blue),
-                          textStyle: MaterialStateTextStyle.resolveWith(
-                            (states) => const TextStyle(color: Colors.white),
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => const HomeScreen()));
+                        } 
+                        //
+                        BlocProvider.of<LoginBloc>(context).add(
+                          LoginButtonPressed(
+                            email: state.email,
+                            password: state.password,
                           ),
+                        );
+                        BlocProvider.of<LoginBloc>(context).add(CheckLogin(
+                            email: state.email, password: state.password));
+                      },
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(Colors.blue),
+                        textStyle: MaterialStateTextStyle.resolveWith(
+                          (states) => const TextStyle(color: Colors.white),
                         ),
-                        child: const Text('Login'),
                       ),
+                      child: const Text('Login'),
                     );
                   },
                 ),

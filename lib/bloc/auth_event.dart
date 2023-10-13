@@ -19,4 +19,9 @@ class LoginButtonPressed extends LoginEvent {
   LoginButtonPressed({required this.email, required this.password});
 }
 
-class CheckLogin extends LoginEvent {}
+class CheckLogin extends LoginEvent {
+  final String email;
+  final String password;
+
+  CheckLogin({required this.email, required this.password});
+}
