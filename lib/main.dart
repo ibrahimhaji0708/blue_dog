@@ -1,62 +1,150 @@
-import 'package:blue_dog/bloc/auth_bloc.dart';
-import 'package:blue_dog/bloc/auth_event.dart';
-import 'package:blue_dog/bloc/auth_state.dart';
 import 'package:blue_dog/email_password_input.dart';
 import 'package:blue_dog/forgot_password.dart';
 import 'package:blue_dog/home_screen.dart';
 import 'package:blue_dog/register.dart';
-import 'package:blue_dog/verification.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:supabase/supabase.dart';
 
 void main() {
   runApp(const BlueDog());
-  GoogleSignIn().onCurrentUserChanged.listen((GoogleSignInAccount? account) {
-    // Handle the signed-in user (or null if no user is signed in)
-  });
+}
+
+final supabase = SupabaseClient(
+  'https://ydvzfbbrjpyccxoabdxz.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkdnpmYmJyanB5Y2N4b2FiZHh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTQ3ODAwMDQsImV4cCI6MjAxMDM1NjAwNH0.wkQE09ZoNK5PQBa89Pp17CYitzf6h_kp6O1fPFfCwO4',
+);
+final TextEditingController _emailController = TextEditingController();
+final TextEditingController _passwordController = TextEditingController();
+bool _emailValid = false;
+bool _passwordValid = false;
+String? emailError;
+String? passwordError;
+
+Future<void> _login(context) async {
+  final email = _emailController.text.trim();
+  final password = _passwordController.text.trim();
+
+  if (email.isEmpty || password.isEmpty) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: const Text('Email and password are required.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  } else if (!_isEmailValid(email) || password.length < 6) {
+    // Handle email format and password length errors
+    // Show a validation error dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Validation Error'),
+          content: const Text('Please check email and password format.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  } else {
+    try {
+      // Check if the user exists in Supabase
+      final userQuery =await supabase.from('users').select().eq('email', email);
+
+      if (userQuery.error != null) {
+        print('Error querying user: ${userQuery.error!.message}');
+      }
+      else if (userQuery.data == null || userQuery.data.isEmpty) {
+        // User doesn't exist
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Registration Required'),
+              content: const Text('You haven\'t registered yet.'),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('OK'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        // User exists, perform login
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            actions: <Widget>[
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const HomeScreen()));
+                },
+              ),
+            ],
+            title: const Text('You have been logged in successfully.'),
+          ),
+        );
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+}
+
+bool _isEmailValid(String email) {
+  final emailRegex = RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
+  return emailRegex.hasMatch(email);
 }
 
 class BlueDog extends StatelessWidget {
   const BlueDog({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      routes: {
-        '/verify': (context) => const VerificationScreen(),
-      },
       debugShowCheckedModeBanner: false,
       title: 'Blue Dog',
       theme: ThemeData(
-        useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color.fromARGB(255, 255, 255, 255),
         ),
+        useMaterial3: true,
       ),
-      home: BlocProvider(
-        create: (context) => LoginBloc(LoginState()),
-        child: const LoginPage(),
-      ),
+      home: const LoginPage(),
     );
   }
 }
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
-
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final loginBloc = LoginBloc(LoginState());
   // final mainCubit = BlocProvider.of<MainCubit>(context);
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  bool emailValid = false;
-  bool passwordValid = false;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,34 +158,33 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const SizedBox(height: 63.0),
-              //Image logo
               Image.asset(
                 'assets/images/blue_dog.png',
                 height: 150.0,
                 width: 150.0,
               ),
               const SizedBox(height: 70.0),
-              // error text in both the textfields
               EmailPasswordInput(
                 controller: _emailController,
                 hintText: 'Email',
                 onValidationChanged: (isValid) {
-                  emailValid = isValid;
+                  setState(() {
+                    _emailValid = isValid;
+                  });
                 },
               ),
-              const SizedBox(height: 5),
               EmailPasswordInput(
                 controller: _passwordController,
                 hintText: 'Password',
                 isPassword: true,
                 onValidationChanged: (isValid) {
-                  passwordValid = isValid;
+                  setState(() {
+                    _passwordValid = isValid;
+                  });
                 },
               ),
               const SizedBox(height: 20),
-              //
               const SizedBox(height: 10.0),
-              //forgot password button
               TextButton(
                 onPressed: () {
                   Navigator.of(context).push(
@@ -108,60 +195,24 @@ class _LoginPageState extends State<LoginPage> {
                 },
                 child: const Text('FORGOT PASSWORD'),
               ),
-              // login button
               const SizedBox(height: 20.0),
               // ignore: sized_box_for_whitespace
               Container(
                 width: 350,
                 height: 50,
-                child: BlocBuilder<LoginBloc, LoginState>(
-                  builder: (context, state) {
-                    return OutlinedButton(
-                      onPressed: () {
-                        if (state.errMsg != null) {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: const Text('Error'),
-                                content: Text(state.errMsg),
-                                actions: <Widget>[
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text('OK'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        } else if (state.loggedIn) {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const HomeScreen()));
-                        } 
-                        //
-                        BlocProvider.of<LoginBloc>(context).add(
-                          LoginButtonPressed(
-                            email: state.email,
-                            password: state.password,
-                          ),
-                        );
-                        BlocProvider.of<LoginBloc>(context).add(CheckLogin(
-                            email: state.email, password: state.password));
-                      },
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(Colors.blue),
-                        textStyle: MaterialStateTextStyle.resolveWith(
-                          (states) => const TextStyle(color: Colors.white),
-                        ),
-                      ),
-                      child: const Text('Login'),
-                    );
+                child: OutlinedButton(
+                  onPressed: () {
+                    _login(context);
                   },
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.blue),
+                    textStyle: MaterialStateTextStyle.resolveWith(
+                      (states) => const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  child: const Text('Login'),
                 ),
               ),
-              //register button
               const SizedBox(height: 10.0),
               // ignore: sized_box_for_whitespace
               Container(

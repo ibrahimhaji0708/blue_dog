@@ -22,7 +22,7 @@ class HomeScreen extends StatelessWidget {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const LoginPage()));
+                  MaterialPageRoute(builder: (context) => const BlueDog()));
             },
           ),
         ],
