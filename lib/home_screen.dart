@@ -4,6 +4,14 @@ import 'package:flutter/material.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+  void _logOut(BuildContext context) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const LoginPage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,9 +28,8 @@ class HomeScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () async {
-              Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const BlueDog()));
+            onPressed: () {
+              _logOut(context);
             },
           ),
         ],
@@ -33,8 +40,8 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       body: Container(
-          // Add your home screen content here
-          ),
+        // Add your home screen content here
+      ),
     );
   }
 }

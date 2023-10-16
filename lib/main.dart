@@ -2,6 +2,7 @@ import 'package:blue_dog/email_password_input.dart';
 import 'package:blue_dog/forgot_password.dart';
 import 'package:blue_dog/home_screen.dart';
 import 'package:blue_dog/register.dart';
+import 'package:blue_dog/verification.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase/supabase.dart';
 
@@ -21,63 +22,61 @@ String? emailError;
 String? passwordError;
 
 Future<void> _login(context) async {
-  final email = _emailController.text.trim();
-  final password = _passwordController.text.trim();
+  if (_emailValid && _passwordValid) {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
 
-  if (email.isEmpty || password.isEmpty) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Error'),
-          content: const Text('Email and password are required.'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  } else if (!_isEmailValid(email) || password.length < 6) {
-    // Handle email format and password length errors
-    // Show a validation error dialog
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Validation Error'),
-          content: const Text('Please check email and password format.'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  } else {
-    try {
-      // Check if the user exists in Supabase
-      final userQuery =await supabase.from('users').select().eq('email', email);
+    await Future.delayed(const Duration(seconds: 2));
 
-      if (userQuery.error != null) {
-        print('Error querying user: ${userQuery.error!.message}');
-      }
-      else if (userQuery.data == null || userQuery.data.isEmpty) {
-        // User doesn't exist
+    if (email.isEmpty || password.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Error'),
+            content: const Text('Email and password are required.'),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    } else if (password.length < 6 ||
+        !email.contains('@') ||
+        !email.contains('.com')) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Validation Error'),
+            content: const Text('Please check email and password format.'),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      final userQuery =
+          await supabase.from('users').select().eq('email', email);
+      if (userQuery is List && userQuery.isEmpty) {
+        // User not found.
         showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: const Text('Registration Required'),
-              content: const Text('You haven\'t registered yet.'),
+              title: const Text('Error'),
+              content: const Text('User not found.'),
               actions: <Widget>[
                 TextButton(
                   child: const Text('OK'),
@@ -89,34 +88,12 @@ Future<void> _login(context) async {
             );
           },
         );
-      } else {
-        // User exists, perform login
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            actions: <Widget>[
-              TextButton(
-                child: const Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const HomeScreen()));
-                },
-              ),
-            ],
-            title: const Text('You have been logged in successfully.'),
-          ),
-        );
+      } else if (userQuery is List && userQuery.isNotEmpty) {
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => const HomeScreen()));
       }
-    } catch (e) {
-      print("Error: $e");
     }
   }
-}
-
-bool _isEmailValid(String email) {
-  final emailRegex = RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
-  return emailRegex.hasMatch(email);
 }
 
 class BlueDog extends StatelessWidget {
@@ -124,6 +101,9 @@ class BlueDog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      routes: {
+        '/verify': (context) => const VerificationScreen(),
+      },
       debugShowCheckedModeBanner: false,
       title: 'Blue Dog',
       theme: ThemeData(
@@ -144,7 +124,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  // final mainCubit = BlocProvider.of<MainCubit>(context);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
