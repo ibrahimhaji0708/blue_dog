@@ -1,35 +1,22 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:blue_dog/reset_password.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase/supabase.dart';
-
-class ForgotPasswordState {
-  final bool isLoading;
-  final bool isEmailSent;
-
-  ForgotPasswordState({
-    required this.isLoading,
-    required this.isEmailSent,
-  });
-
-  factory ForgotPasswordState.initial() {
-    return ForgotPasswordState(isLoading: false, isEmailSent: false);
-  }
-
-  ForgotPasswordState copyWith({
-    bool? isLoading,
-    bool? isEmailSent,
-  }) {
-    return ForgotPasswordState(
-      isLoading: isLoading ?? this.isLoading,
-      isEmailSent: isEmailSent ?? this.isEmailSent,
-    );
-  }
-}
 
 class SendPasswordResetEmail extends StatefulWidget {
   const SendPasswordResetEmail({Key? key}) : super(key: key);
 
   @override
   State<SendPasswordResetEmail> createState() => _SendPasswordResetEmailState();
+}
+
+void navigateToResetPassword(BuildContext context) {
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (context) => const ResetPassword(),
+    ),
+  );
 }
 
 class _SendPasswordResetEmailState extends State<SendPasswordResetEmail> {
@@ -91,12 +78,17 @@ class _SendPasswordResetEmailState extends State<SendPasswordResetEmail> {
                         isEmailSent = true;
                       });
 
+                      if (!isLoading && isEmailSent == true) {
+                        navigateToResetPassword(context);
+                      }
+
                       showDialog(
                         context: context,
                         builder: (context) {
                           return const AlertDialog(
                             title: Text('Email Sent'),
-                            content: Text('Password reset link sent successfully.'),
+                            content:
+                                Text('Password reset link sent successfully.'),
                           );
                         },
                       );
