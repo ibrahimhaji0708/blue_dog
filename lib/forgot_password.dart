@@ -81,17 +81,6 @@ class _SendPasswordResetEmailState extends State<SendPasswordResetEmail> {
                       if (!isLoading && isEmailSent == true) {
                         navigateToResetPassword(context);
                       }
-
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return const AlertDialog(
-                            title: Text('Email Sent'),
-                            content:
-                                Text('Password reset link sent successfully.'),
-                          );
-                        },
-                      );
                     } catch (e) {
                       print('Error sending password reset email: $e');
                       setState(() {
