@@ -5,10 +5,31 @@ import 'package:blue_dog/register.dart';
 import 'package:blue_dog/verification.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase/supabase.dart';
+//import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart';
 
 void main() {
-  runApp(const BlueDog());
+  runApp(ChangeNotifierProvider(
+    child: const BlueDog(),
+    create: (context) => AuthProvider(),
+  ));
+  //checkUserSession();
 }
+
+// Future<void> saveUserSession(String token) async {
+//   final prefs = await SharedPreferences.getInstance();
+//   await prefs.setString('user_token', token);
+// }
+
+// Future<void> checkUserSession() async {
+//   final prefs = await SharedPreferences.getInstance();
+//   final token = prefs.getString('user_token');
+
+//   if (token != null) {
+//     await _login(token);
+//   }
+// }
 
 final supabase = SupabaseClient(
   'https://ydvzfbbrjpyccxoabdxz.supabase.co',
@@ -114,6 +135,22 @@ class BlueDog extends StatelessWidget {
       ),
       home: const LoginPage(),
     );
+  }
+}
+
+class AuthProvider with ChangeNotifier {
+  bool _isLoggedIn = false;
+
+  bool get isLoggedIn => _isLoggedIn;
+
+  void login() {
+    _isLoggedIn = true;
+    notifyListeners();
+  }
+
+  void logout() {
+    _isLoggedIn = false;
+    notifyListeners();
   }
 }
 
