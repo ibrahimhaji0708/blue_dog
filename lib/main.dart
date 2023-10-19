@@ -4,32 +4,22 @@ import 'package:blue_dog/home_screen.dart';
 import 'package:blue_dog/register.dart';
 import 'package:blue_dog/verification.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase/supabase.dart';
-//import 'package:shared_preferences/shared_preferences.dart';
-import 'package:provider/provider.dart';
-import 'package:flutter/foundation.dart';
 
-void main() {
-  runApp(ChangeNotifierProvider(
-    child: const BlueDog(),
-    create: (context) => AuthProvider(),
+// void main() {
+//   runApp(const BlueDog());
+// }
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  final userToken = prefs.getString('user_token');
+
+  runApp(MaterialApp(
+    home: userToken != null ? const HomeScreen() : const LoginPage(),
   ));
-  //checkUserSession();
 }
 
-// Future<void> saveUserSession(String token) async {
-//   final prefs = await SharedPreferences.getInstance();
-//   await prefs.setString('user_token', token);
-// }
-
-// Future<void> checkUserSession() async {
-//   final prefs = await SharedPreferences.getInstance();
-//   final token = prefs.getString('user_token');
-
-//   if (token != null) {
-//     await _login(token);
-//   }
-// }
 
 final supabase = SupabaseClient(
   'https://ydvzfbbrjpyccxoabdxz.supabase.co',
@@ -138,22 +128,6 @@ class BlueDog extends StatelessWidget {
   }
 }
 
-class AuthProvider with ChangeNotifier {
-  bool _isLoggedIn = false;
-
-  bool get isLoggedIn => _isLoggedIn;
-
-  void login() {
-    _isLoggedIn = true;
-    notifyListeners();
-  }
-
-  void logout() {
-    _isLoggedIn = false;
-    notifyListeners();
-  }
-}
-
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
   @override
@@ -161,6 +135,15 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   UserLoginStatus.isLoggedIn().then((isLoggedIn) {
+  //     if (isLoggedIn) {
+  //       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const HomeScreen()));
+  //     }
+  //   });
+  // }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

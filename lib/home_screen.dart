@@ -1,29 +1,15 @@
-import 'package:blue_dog/main.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-//import 'package:shared_preferences/shared_preferences.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
-  void _logOut(BuildContext context) async {
-    // final prefs = await SharedPreferences.getInstance();
-    // await prefs.remove('user_token');
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    authProvider.logout();
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
 
-    // Navigate back to the login page
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const LoginPage(),
-      ),
-    );
-  }
-
+class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
-
     return PopScope(
       canPop: true,
       child: Scaffold(
@@ -38,11 +24,12 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           actions: [
-            if (authProvider.isLoggedIn)
             IconButton(
               icon: const Icon(Icons.logout),
               onPressed: () {
-                _logOut(context);
+                Navigator.of(context).pop();
+                // UserLoginStatus.setLoggedIn(false);
+                // Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const LoginPage()));
               },
             ),
           ],
