@@ -142,6 +142,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  bool _obscurePassword = true;
+
   @override
   void initState() {
     super.initState();
@@ -161,7 +163,7 @@ class _LoginPageState extends State<LoginPage> {
       onWillPop: () async {
         await _saveLoginState(true);
         await _exitApp();
-        return true; 
+        return true;
       },
       child: Scaffold(
         appBar: AppBar(
@@ -189,15 +191,20 @@ class _LoginPageState extends State<LoginPage> {
                     });
                   },
                 ),
-                EmailPasswordInput(
+                TextFormField(
+                  
                   controller: _passwordController,
-                  hintText: 'Password',
-                  isPassword: true,
-                  onValidationChanged: (isValid) {
+                  obscureText:_obscurePassword,
+                ),
+                IconButton(
+                  onPressed: () {
                     setState(() {
-                      _passwordValid = isValid;
+                      _obscurePassword = !_obscurePassword;
                     });
                   },
+                  icon: Icon(_obscurePassword
+                      ? Icons.visibility
+                      : Icons.visibility_off),
                 ),
                 const SizedBox(height: 20),
                 const SizedBox(height: 10.0),
