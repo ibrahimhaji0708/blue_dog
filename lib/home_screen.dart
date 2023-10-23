@@ -10,9 +10,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: true,
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           title: const Text('home page'),
           leading: Builder(
@@ -42,7 +40,6 @@ class _HomeScreenState extends State<HomeScreen> {
         body: Container(
           // Add your home screen content here
         ),
-      ),
-    );
+      );
   }
 }
