@@ -4,22 +4,13 @@ import 'package:blue_dog/home_screen.dart';
 import 'package:blue_dog/register.dart';
 import 'package:blue_dog/verification.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase/supabase.dart';
 
-// void main() {
-//   runApp(const BlueDog());
-// }
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  final prefs = await SharedPreferences.getInstance();
-  final userToken = prefs.getString('user_token');
-
-  runApp(MaterialApp(
-    home: userToken != null ? const HomeScreen() : const LoginPage(),
-  ));
+void main() {
+  runApp(const BlueDog());
 }
-
 
 final supabase = SupabaseClient(
   'https://ydvzfbbrjpyccxoabdxz.supabase.co',
@@ -32,12 +23,28 @@ bool _passwordValid = false;
 String? emailError;
 String? passwordError;
 
+Future<void> _saveLoginState(bool loggedIn) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('loggedIn', loggedIn);
+}
+
+Future<bool> _getLoginState() async {
+  final prefs = await SharedPreferences.getInstance();
+  final loggedIn = prefs.getBool('loggedIn');
+  return loggedIn ?? false;
+}
+
+Future<void> _exitApp() async {
+  await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+}
+
 Future<void> _login(context) async {
   if (_emailValid && _passwordValid) {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
     await Future.delayed(const Duration(seconds: 2));
+    await _saveLoginState(true);
 
     if (email.isEmpty || password.isEmpty) {
       showDialog(
@@ -135,100 +142,111 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   UserLoginStatus.isLoggedIn().then((isLoggedIn) {
-  //     if (isLoggedIn) {
-  //       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const HomeScreen()));
-  //     }
-  //   });
-  // }
+  @override
+  void initState() {
+    super.initState();
+
+    _getLoginState().then((loggedIn) {
+      if (loggedIn) {
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => const HomeScreen()));
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('BLUE DOG'),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(height: 63.0),
-              Image.asset(
-                'assets/images/blue_dog.png',
-                height: 150.0,
-                width: 150.0,
-              ),
-              const SizedBox(height: 70.0),
-              EmailPasswordInput(
-                controller: _emailController,
-                hintText: 'Email',
-                onValidationChanged: (isValid) {
-                  setState(() {
-                    _emailValid = isValid;
-                  });
-                },
-              ),
-              EmailPasswordInput(
-                controller: _passwordController,
-                hintText: 'Password',
-                isPassword: true,
-                onValidationChanged: (isValid) {
-                  setState(() {
-                    _passwordValid = isValid;
-                  });
-                },
-              ),
-              const SizedBox(height: 20),
-              const SizedBox(height: 10.0),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const SendPasswordResetEmail(),
-                    ),
-                  );
-                },
-                child: const Text('FORGOT PASSWORD'),
-              ),
-              const SizedBox(height: 20.0),
-              // ignore: sized_box_for_whitespace
-              Container(
-                width: 350,
-                height: 50,
-                child: OutlinedButton(
-                  onPressed: () {
-                    _login(context);
-                  },
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Colors.blue),
-                    textStyle: MaterialStateTextStyle.resolveWith(
-                      (states) => const TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  child: const Text('Login'),
+    // ignore: deprecated_member_use
+    return WillPopScope(
+      onWillPop: () async {
+        await _saveLoginState(true);
+        await _exitApp();
+        return true; 
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('BLUE DOG'),
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 63.0),
+                Image.asset(
+                  'assets/images/blue_dog.png',
+                  height: 150.0,
+                  width: 150.0,
                 ),
-              ),
-              const SizedBox(height: 10.0),
-              // ignore: sized_box_for_whitespace
-              Container(
-                width: 350,
-                height: 50,
-                child: OutlinedButton(
+                const SizedBox(height: 70.0),
+                EmailPasswordInput(
+                  controller: _emailController,
+                  hintText: 'Email',
+                  onValidationChanged: (isValid) {
+                    setState(() {
+                      _emailValid = isValid;
+                    });
+                  },
+                ),
+                EmailPasswordInput(
+                  controller: _passwordController,
+                  hintText: 'Password',
+                  isPassword: true,
+                  onValidationChanged: (isValid) {
+                    setState(() {
+                      _passwordValid = isValid;
+                    });
+                  },
+                ),
+                const SizedBox(height: 20),
+                const SizedBox(height: 10.0),
+                TextButton(
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const RegisterUser(),
+                        builder: (context) => const SendPasswordResetEmail(),
                       ),
                     );
                   },
-                  child: const Text('Register'),
+                  child: const Text('FORGOT PASSWORD'),
                 ),
-              ),
-            ],
+                const SizedBox(height: 20.0),
+                // ignore: sized_box_for_whitespace
+                Container(
+                  width: 350,
+                  height: 50,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      _login(context);
+                    },
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.blue),
+                      textStyle: MaterialStateTextStyle.resolveWith(
+                        (states) => const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    child: const Text('Login'),
+                  ),
+                ),
+                const SizedBox(height: 10.0),
+                // ignore: sized_box_for_whitespace
+                Container(
+                  width: 350,
+                  height: 50,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const RegisterUser(),
+                        ),
+                      );
+                    },
+                    child: const Text('Register'),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
