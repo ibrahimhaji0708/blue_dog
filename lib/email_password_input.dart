@@ -5,10 +5,12 @@ class EmailPasswordInput extends StatelessWidget {
   final bool isPassword;
   final Function(bool isValid)? onValidationChanged;
   final String? errorText;
+  // final bool obscureText;
 
   const EmailPasswordInput({
     required this.controller,
     required this.hintText,
+    // required this.obscureText,
     this.isPassword = false,
     this.onValidationChanged,
     this.errorText,

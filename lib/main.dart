@@ -2,6 +2,7 @@ import 'package:blue_dog/email_password_input.dart';
 import 'package:blue_dog/forgot_password.dart';
 import 'package:blue_dog/home_screen.dart';
 import 'package:blue_dog/register.dart';
+import 'package:blue_dog/splash/splash_screen.dart';
 import 'package:blue_dog/verification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -130,8 +131,44 @@ class BlueDog extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const LoginPage(),
+      //home: const LoginPage(),
+      home: const SplashScreenRouter()
     );
+  }
+}
+
+class SplashScreenRouter extends StatefulWidget {
+  const SplashScreenRouter({super.key});
+
+  @override
+  State<SplashScreenRouter> createState() => _SplashScreenRouterState();
+}
+
+class _SplashScreenRouterState extends State<SplashScreenRouter> {
+  bool _showLoginPage = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLoginPage();
+  }
+
+  Future<void> _loadLoginPage() async {
+    await Future.delayed(const Duration(seconds: 2));
+    //set the state to true 
+    setState(() {
+      _showLoginPage = true;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    //if check if showlogin page is true go to Loginpage() else don't change the state 
+    if (_showLoginPage) {
+      return const LoginPage();
+    } else {
+      return const SplashScreen();
+    }
   }
 }
 
@@ -142,8 +179,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  bool _obscurePassword = true;
-
   @override
   void initState() {
     super.initState();
@@ -191,21 +226,25 @@ class _LoginPageState extends State<LoginPage> {
                     });
                   },
                 ),
-                TextFormField(
-                  
+                EmailPasswordInput(
                   controller: _passwordController,
-                  obscureText:_obscurePassword,
-                ),
-                IconButton(
-                  onPressed: () {
+                  hintText: 'Password',
+                  onValidationChanged: (isValid) {
                     setState(() {
-                      _obscurePassword = !_obscurePassword;
+                      _passwordValid = isValid;
                     });
                   },
-                  icon: Icon(_obscurePassword
-                      ? Icons.visibility
-                      : Icons.visibility_off),
                 ),
+                // IconButton(
+                //   onPressed: () {
+                //     setState(() {
+                //       _obscurePassword = !_obscurePassword;
+                //     });
+                //   },
+                //   icon: Icon(_obscurePassword
+                //       ? Icons.visibility
+                //       : Icons.visibility_off),
+                // ),
                 const SizedBox(height: 20),
                 const SizedBox(height: 10.0),
                 TextButton(
